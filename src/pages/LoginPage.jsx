@@ -28,16 +28,6 @@ const LoginPage = () => {
                         <span className="text-2xl font-black text-white tracking-tight">Agro ERP</span>
                     </div>
 
-                    {/* Hero Content */}
-                    <div className="mt-auto mb-20 max-w-lg">
-                        <h1 className="text-5xl font-black text-white leading-[1.15] mb-6">
-                            Cultivating growth through digital precision.
-                        </h1>
-                        <div className="w-24 h-1.5 bg-primary-500 rounded-full mb-8"></div>
-                        <p className="text-xl text-slate-200 font-medium">
-                            Join over 50,000 farmers optimizing their yields today.
-                        </p>
-                    </div>
                 </div>
             </div>
 

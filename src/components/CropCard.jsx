@@ -1,6 +1,6 @@
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
-export const ExploreCropCard = ({ data }) => {
+export const ExploreCropCard = ({ data, aiMatch }) => {
     return (
         <div className="min-w-[280px] h-[360px] relative rounded-2xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
             <div
@@ -9,11 +9,20 @@ export const ExploreCropCard = ({ data }) => {
             ></div>
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent z-10"></div>
 
-            {data.badge && (
-                <div className="absolute top-4 left-4 z-20 px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-lg border border-white/30">
-                    <span className="text-xs font-bold text-white tracking-wider">{data.badge}</span>
-                </div>
-            )}
+            <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
+                {data.badge && (
+                    <div className="px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-lg border border-white/30 w-max">
+                        <span className="text-xs font-bold text-white tracking-wider">{data.badge}</span>
+                    </div>
+                )}
+
+                {aiMatch && (
+                    <div className="px-3 py-1.5 bg-green-500 rounded-lg border border-green-400 w-max flex items-center gap-1 shadow-lg shadow-green-500/30">
+                        <span className="material-symbols-outlined text-[14px] text-white">smart_toy</span>
+                        <span className="text-xs font-black text-white tracking-wider uppercase">AI Weather Match</span>
+                    </div>
+                )}
+            </div>
 
             <div className="absolute bottom-0 left-0 w-full p-6 z-20">
                 <h4 className="text-xl font-bold text-white mb-2">{data.name}</h4>

@@ -5,7 +5,8 @@ import {
     Sprout,
     BarChart3,
     User,
-    HelpCircle
+    HelpCircle,
+    CloudLightning
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -15,6 +16,7 @@ const Sidebar = () => {
         { name: 'Market Prices', path: '/market-prices', icon: BarChart3 },
         { name: 'Profile', path: '/profile', icon: User },
         { name: 'Help', path: '/help', icon: HelpCircle },
+        { name: 'Weather AI', path: '/weather', icon: CloudLightning },
     ];
 
     return (

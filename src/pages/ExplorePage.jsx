@@ -3,8 +3,21 @@ import Topbar from '../components/Topbar';
 import { ExploreCropCard } from '../components/CropCard';
 import { exploreCrops } from '../data/mockData';
 import { Sprout, TrendingUp, HandCoins, Building2, Sun } from 'lucide-react';
+import { useWeatherPrediction } from '../hooks/useWeatherPrediction';
+import { useState } from 'react';
 
 const ExplorePage = () => {
+    const { prediction } = useWeatherPrediction();
+    const [filterAiMatch, setFilterAiMatch] = useState(false);
+
+    // Simulate matching some crops randomly since we don't have enough backend model granularity for every individual string crop name
+    const isAiMatch = prediction?.best_sowing_window === 'optimal';
+
+    // In a real app we'd map crop to suitability score directly. For demo, we apply the match if condition is optimal.
+    const displayedCrops = filterAiMatch
+        ? exploreCrops.filter(c => prediction?.crop_suitability_score > 70)
+        : exploreCrops;
+
     return (
         <div className="flex h-screen bg-[#edf5f0] overflow-hidden">
             <Sidebar />
@@ -39,13 +52,30 @@ const ExplorePage = () => {
                                 {/* Best Crops to Plant */}
                                 <section>
                                     <div className="flex justify-between items-center mb-6">
-                                        <h3 className="text-xl font-black text-slate-900">Best Crops to Plant</h3>
+                                        <div className="flex items-center gap-4">
+                                            <h3 className="text-xl font-black text-slate-900">Best Crops to Plant</h3>
+
+                                            {/* AI Filter Toggle */}
+                                            {prediction && (
+                                                <button
+                                                    onClick={() => setFilterAiMatch(!filterAiMatch)}
+                                                    className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${filterAiMatch
+                                                            ? 'bg-primary-50 text-primary-700 border-primary-200'
+                                                            : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                                                        }`}
+                                                >
+                                                    <span className="material-symbols-outlined text-[14px]">psychology</span>
+                                                    Filter AI Suitability {'>'} 70
+                                                </button>
+                                            )}
+                                        </div>
                                         <button className="text-sm font-bold text-primary-600 hover:underline">View All</button>
                                     </div>
                                     <div className="flex gap-6 overflow-x-auto pb-4 snap-x hide-scrollbar">
-                                        {exploreCrops.map((crop) => (
+                                        {displayedCrops.map((crop, index) => (
                                             <div key={crop.id} className="snap-start">
-                                                <ExploreCropCard data={crop} />
+                                                {/* For visual demo, we make every alternating crop an AI match if the overall window is optimal */}
+                                                <ExploreCropCard data={crop} aiMatch={isAiMatch && index % 2 === 0} />
                                             </div>
                                         ))}
                                     </div>

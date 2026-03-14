@@ -1,15 +1,17 @@
 import Sidebar from '../components/Sidebar';
 import Topbar from '../components/Topbar';
-import WeatherChart from '../components/WeatherChart';
+import WeatherPredictionCard from '../components/WeatherPredictionCard';
 import CropProgressTimeline from '../components/CropProgressTimeline';
 import { MarketInsightCard, MyCropDetailCard } from '../components/CropCard';
 import { marketInsights, myCropsList, treatmentHistory } from '../data/mockData';
+import { useWeatherPrediction } from '../hooks/useWeatherPrediction';
 import { NavLink } from 'react-router-dom';
 import { useState } from 'react';
 import { LayoutGrid, List, Plus, CheckCircle2 } from 'lucide-react';
 
 const DashboardPage = () => {
     const [layout, setLayout] = useState('grid');
+    const { prediction, isLoading } = useWeatherPrediction();
 
     return (
         <div className="flex h-screen bg-[#edf5f0] overflow-hidden">
@@ -22,7 +24,7 @@ const DashboardPage = () => {
 
                         {/* Left Column (70%) */}
                         <div className="w-full lg:w-8/12 flex flex-col gap-6">
-                            <WeatherChart />
+                            <WeatherPredictionCard weatherData={prediction} isLoading={isLoading} />
                             <CropProgressTimeline />
 
                             <section className="mt-2">
@@ -59,11 +61,13 @@ const DashboardPage = () => {
                                                 <span className="material-symbols-outlined">water_drop</span>
                                             </div>
                                             <div>
-                                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Soil Moisture</p>
-                                                <p className="text-2xl font-black text-slate-900">64%</p>
+                                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Crop Suitability</p>
+                                                <p className="text-2xl font-black text-slate-900">
+                                                    {isLoading || !prediction ? '...' : `${Math.round(prediction.crop_suitability_score)}%`}
+                                                </p>
                                             </div>
                                         </div>
-                                        <span className="px-2.5 py-1 bg-green-100 text-green-700 text-[10px] font-bold uppercase rounded border border-green-200 relative z-10">+4% Optimal</span>
+                                        <span className="px-2.5 py-1 bg-green-100 text-green-700 text-[10px] font-bold uppercase rounded border border-green-200 relative z-10">AI Predicted</span>
                                     </div>
 
                                     <div className="bg-slate-50 border border-slate-100 p-5 rounded-2xl flex items-center justify-between relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">

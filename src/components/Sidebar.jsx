@@ -55,15 +55,6 @@ const Sidebar = () => {
                 ))}
             </nav>
 
-            <div className="p-4 mt-auto">
-                <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl text-center">
-                    <p className="text-sm font-bold text-slate-900">Premium Plan</p>
-                    <p className="text-xs text-slate-500 mb-4 mt-1">Get advanced soil analytics</p>
-                    <button className="w-full py-2 bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold rounded-lg transition-colors shadow-sm">
-                        UPGRADE
-                    </button>
-                </div>
-            </div>
         </aside>
     );
 };

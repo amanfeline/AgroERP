@@ -20,6 +20,31 @@ export const login = async (email, password) => {
     }
 };
 
+export const googleLogin = async () => {
+    await new Promise(r => setTimeout(r, 500));
+    
+    const users = getMockUsers();
+    const mockEmail = `googleuser_${Date.now()}@gmail.com`;
+    
+    const newUser = {
+        _id: Date.now().toString(),
+        name: "Google User",
+        email: mockEmail,
+        role: "farmer",
+        isActive: true,
+        createdAt: new Date().toISOString()
+    };
+    
+    users.push(newUser);
+    saveMockUsers(users);
+    
+    return {
+        success: true,
+        accessToken: "mock_jwt_google_" + Date.now(),
+        user: newUser
+    };
+};
+
 export const register = async (name, email, password, role = 'farmer') => {
     await new Promise(r => setTimeout(r, 500));
     

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { login as loginApi, register as registerApi, getMe } from '../services/authApi';
+import { login as loginApi, register as registerApi, getMe, googleLogin as googleLoginApi } from '../services/authApi';
 
 const AuthContext = createContext(null);
 
@@ -47,6 +47,21 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const googleLogin = async () => {
+        try {
+            const data = await googleLoginApi();
+            if (data.success) {
+                setToken(data.accessToken);
+                setUser(data.user);
+                localStorage.setItem('token', data.accessToken);
+                return { success: true };
+            }
+            return { success: false, message: data.message || "Google login failed" };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    };
+
     const register = async (name, email, password, role) => {
         try {
             const data = await registerApi(name, email, password, role);
@@ -65,13 +80,28 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
     };
 
+    const updateProfile = (data) => {
+        if (!user) return;
+        const updatedUser = { ...user, ...data };
+        setUser(updatedUser);
+        
+        const users = JSON.parse(localStorage.getItem('mockUsers') || '[]');
+        const userIndex = users.findIndex(u => u.email === user.email);
+        if (userIndex !== -1) {
+            users[userIndex] = { ...users[userIndex], ...data };
+            localStorage.setItem('mockUsers', JSON.stringify(users));
+        }
+    };
+
     const value = {
         user,
         token,
         isLoading,
         login,
+        googleLogin,
         register,
         logout,
+        updateProfile,
         isAuthenticated: !!token
     };
 

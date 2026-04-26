@@ -30,7 +30,7 @@ const startServer = async () => {
   };
 
   process.on('SIGTERM', () => shutdown('SIGTERM'));
-  process.on('SIGINT',  () => shutdown('SIGINT'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 
   // ─── Unhandled Rejections ─────────────────────────────────────────────────
   process.on('unhandledRejection', (reason) => {

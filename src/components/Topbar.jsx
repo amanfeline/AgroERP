@@ -1,6 +1,29 @@
+import { useState, useRef, useEffect } from 'react';
 import { Search, Bell } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Topbar = ({ title = '' }) => {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
+
     return (
         <header className="h-20 flex items-center justify-between px-8 bg-white border-b border-slate-200 sticky top-0 z-50 w-full shadow-sm">
             <div className="flex-1 max-w-xl flex items-center gap-6">
@@ -21,15 +44,44 @@ const Topbar = ({ title = '' }) => {
                     <span className="absolute top-2 right-2 w-2 h-2 bg-primary-500 rounded-full border-2 border-white"></span>
                 </button>
 
-                <div className="flex items-center gap-3 pl-6 border-l border-slate-200 cursor-pointer">
-                    <div className="text-right hidden sm:block">
-                        <p className="text-sm font-bold text-slate-900">John Harrison</p>
-                        <p className="text-xs text-slate-500 font-medium">Westbrook Farms</p>
+                <div className="relative" ref={dropdownRef}>
+                    <div 
+                        className="flex items-center gap-3 pl-6 border-l border-slate-200 cursor-pointer"
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                    >
+                        <div className="text-right hidden sm:block">
+                            <p className="text-sm font-bold text-slate-900">{user?.name || 'Guest'}</p>
+                            <p className="text-xs text-slate-500 font-medium">{user?.farmName || 'No Farm'}</p>
+                        </div>
+                        <div
+                            className="w-10 h-10 rounded-full bg-slate-200 border-2 border-primary-500 bg-cover bg-center"
+                            style={{ backgroundImage: `url('${user?.avatarUrl || 'https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?q=80&w=150&auto=format&fit=crop'}')` }}
+                        ></div>
                     </div>
-                    <div
-                        className="w-10 h-10 rounded-full bg-slate-200 border-2 border-primary-500 bg-cover bg-center"
-                        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?q=80&w=150&auto=format&fit=crop')" }}
-                    ></div>
+
+                    {dropdownOpen && (
+                        <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-50">
+                            <button 
+                                onClick={() => { setDropdownOpen(false); navigate('/profile'); }} 
+                                className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-medium"
+                            >
+                                View Profile
+                            </button>
+                            <button 
+                                onClick={() => { setDropdownOpen(false); navigate('/profile'); }} 
+                                className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-medium"
+                            >
+                                Settings
+                            </button>
+                            <div className="h-px bg-slate-100 my-1"></div>
+                            <button 
+                                onClick={handleLogout} 
+                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-bold"
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </header>

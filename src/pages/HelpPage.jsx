@@ -43,7 +43,7 @@ const HelpPage = () => {
                                         <Phone className="w-7 h-7" />
                                     </div>
                                     <h3 className="font-bold text-lg text-slate-900 mb-2">Call Us</h3>
-                                    <p className="text-sm text-slate-500 font-medium">Available 24/7 for premium members</p>
+                                    <p className="text-sm text-slate-500 font-medium">Available 24/7</p>
                                     <p className="mt-5 font-bold text-primary-600">1-800-AGRO-ERP</p>
                                 </div>
                             </div>

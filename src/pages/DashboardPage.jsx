@@ -1,0 +1,264 @@
+import Sidebar from '../components/Sidebar';
+import Topbar from '../components/Topbar';
+import WeatherPredictionCard from '../components/WeatherPredictionCard';
+import CropProgressTimeline from '../components/CropProgressTimeline';
+import { MarketInsightCard, MyCropDetailCard } from '../components/CropCard';
+import { marketInsights, myCropsList, treatmentHistory } from '../data/mockData';
+import { useWeatherPrediction } from '../hooks/useWeatherPrediction';
+import { NavLink } from 'react-router-dom';
+import { useState } from 'react';
+import { LayoutGrid, List, Plus, CheckCircle2 } from 'lucide-react';
+
+const DashboardPage = () => {
+    const [layout, setLayout] = useState('grid');
+    const { prediction, isLoading } = useWeatherPrediction();
+
+    return (
+        <div className="flex h-screen bg-[#edf5f0] overflow-hidden">
+            <Sidebar />
+            <div className="flex-1 flex flex-col min-w-0 ml-[220px] overflow-y-auto relative">
+                <Topbar />
+
+                <main className="flex-1 p-8">
+                    <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
+
+                        {/* Left Column (70%) */}
+                        <div className="w-full lg:w-8/12 flex flex-col gap-6">
+                            <WeatherPredictionCard weatherData={prediction} isLoading={isLoading} />
+                            <CropProgressTimeline />
+
+                            <section className="mt-2">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-xl font-black text-slate-900">Market Insights</h3>
+                                    <NavLink to="/market-prices" className="text-sm border border-primary-200 bg-white font-bold text-primary-600 px-4 py-1.5 rounded-full hover:bg-primary-50 transition-colors">
+                                        View All Markets →
+                                    </NavLink>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                    {marketInsights.map((insight) => (
+                                        <MarketInsightCard key={insight.id} data={insight} />
+                                    ))}
+                                </div>
+                            </section>
+                        </div>
+
+                        {/* Right Column (30%) */}
+                        <div className="w-full lg:w-4/12 flex flex-col gap-6">
+                            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md">
+                                <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                                    <h3 className="text-lg font-extrabold text-slate-900">Quick Metrics</h3>
+                                    <button className="text-sm font-bold text-primary-600 hover:underline">View Report</button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="bg-slate-50 border border-slate-100 p-5 rounded-2xl flex items-center justify-between relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
+                                        <div
+                                            className="absolute inset-0 bg-cover bg-center opacity-5 group-hover:opacity-15 transition-opacity duration-300 mix-blend-overlay"
+                                            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1599370126788-b4babe8c0c45?q=80&w=300&auto=format&fit=crop')" }}
+                                        ></div>
+                                        <div className="flex items-center gap-4 relative z-10">
+                                            <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-200 flex items-center justify-center text-primary-500">
+                                                <span className="material-symbols-outlined">water_drop</span>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Crop Suitability</p>
+                                                <p className="text-2xl font-black text-slate-900">
+                                                    {isLoading || !prediction ? '...' : `${Math.round(prediction.crop_suitability_score)}%`}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <span className="px-2.5 py-1 bg-green-100 text-green-700 text-[10px] font-bold uppercase rounded border border-green-200 relative z-10">AI Predicted</span>
+                                    </div>
+
+                                    <div className="bg-slate-50 border border-slate-100 p-5 rounded-2xl flex items-center justify-between relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
+                                        <div
+                                            className="absolute inset-0 bg-cover bg-center opacity-5 group-hover:opacity-15 transition-opacity duration-300 mix-blend-overlay"
+                                            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1592982537447-67210fb9c782?q=80&w=300&auto=format&fit=crop')" }}
+                                        ></div>
+                                        <div className="flex items-center gap-4 relative z-10">
+                                            <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-200 flex items-center justify-center text-red-500">
+                                                <span className="material-symbols-outlined text-[20px]">thermostat</span>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Air Humidity</p>
+                                                <p className="text-2xl font-black text-slate-900">42%</p>
+                                            </div>
+                                        </div>
+                                        <span className="px-2.5 py-1 bg-red-100 text-red-700 text-[10px] font-bold uppercase rounded border border-red-200 relative z-10">-2% Low</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Extra visual filler card for right col */}
+                            <div className="bg-primary-900 rounded-2xl p-6 shadow-md relative overflow-hidden flex-1 min-h-[200px]">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-800 rounded-bl-full opacity-50"></div>
+                                <div className="relative z-10 flex flex-col h-full">
+                                    <span className="material-symbols-outlined text-primary-400 text-3xl mb-4">psychiatry</span>
+                                    <h3 className="text-xl font-bold text-white mb-2">Automated Soil Report Ready</h3>
+                                    <p className="text-sm text-primary-200 font-medium mb-6">Generated 10 minutes ago based on satellite imagery.</p>
+                                    <button className="mt-auto w-max px-4 py-2 bg-white text-primary-900 text-sm font-bold rounded-lg hover:bg-slate-100 transition-colors">
+                                        Open PDF Report
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    {/* Integrated My Crops Section */}
+                    <div className="max-w-7xl mx-auto space-y-8 mt-12 pt-12 border-t border-slate-200">
+                        {/* Top Stat Row */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md flex flex-col justify-between relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                                <div
+                                    className="absolute inset-0 bg-cover bg-center opacity-5 group-hover:opacity-15 transition-opacity duration-300 mix-blend-overlay"
+                                    style={{ backgroundImage: "url('https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=300&auto=format&fit=crop')" }}
+                                ></div>
+                                <div className="relative z-10">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Total Active Acres</p>
+                                            <h3 className="text-3xl font-black text-slate-900">1,240</h3>
+                                        </div>
+                                        <span className="px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-md">+5.2%</span>
+                                    </div>
+                                    <div className="w-full bg-slate-100 rounded-full h-2">
+                                        <div className="bg-primary-500 h-2 rounded-full w-[85%]"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md flex flex-col justify-between relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                                <div
+                                    className="absolute inset-0 bg-cover bg-center opacity-5 group-hover:opacity-15 transition-opacity duration-300 mix-blend-overlay"
+                                    style={{ backgroundImage: "url('https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?q=80&w=300&auto=format&fit=crop')" }}
+                                ></div>
+                                <div className="relative z-10">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Avg. Soil Health Score</p>
+                                            <h3 className="text-3xl font-black text-slate-900">88%</h3>
+                                        </div>
+                                        <span className="px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-md">+2.1%</span>
+                                    </div>
+                                    <div className="w-full bg-slate-100 rounded-full h-2">
+                                        <div className="bg-primary-500 h-2 rounded-full w-[88%]"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-md flex flex-col justify-between relative overflow-hidden group hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                                <div
+                                    className="absolute inset-0 bg-cover bg-center opacity-5 group-hover:opacity-15 transition-opacity duration-300 mix-blend-overlay"
+                                    style={{ backgroundImage: "url('https://images.unsplash.com/photo-1628001614741-f7a63aa36e1c?q=80&w=300&auto=format&fit=crop')" }}
+                                ></div>
+                                <div className="relative z-10">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Bio-Fertilizer Usage</p>
+                                            <h3 className="text-3xl font-black text-slate-900">450L</h3>
+                                        </div>
+                                        <span className="px-2 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-md">-3.4%</span>
+                                    </div>
+                                    <div className="w-full bg-slate-100 rounded-full h-2">
+                                        <div className="bg-blue-500 h-2 rounded-full w-[45%]"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Crop Overview Section */}
+                        <section>
+                            <div className="flex justify-between items-center mb-6">
+                                <div>
+                                    <h3 className="text-2xl font-black text-slate-900">Crop Overview</h3>
+                                    <p className="text-slate-500 font-medium">Manage and monitor your active plots</p>
+                                </div>
+                                <div className="bg-white border border-slate-200 rounded-lg p-1 flex shadow-sm">
+                                    <button
+                                        onClick={() => setLayout('grid')}
+                                        className={`p-1.5 rounded-md transition-colors ${layout === 'grid' ? 'bg-primary-50 text-primary-600' : 'text-slate-400 hover:text-slate-700'}`}
+                                    >
+                                        <LayoutGrid className="w-5 h-5" />
+                                    </button>
+                                    <button
+                                        onClick={() => setLayout('list')}
+                                        className={`p-1.5 rounded-md transition-colors ${layout === 'list' ? 'bg-primary-50 text-primary-600' : 'text-slate-400 hover:text-slate-700'}`}
+                                    >
+                                        <List className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className={`grid gap-6 ${layout === 'grid' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
+                                {myCropsList.map(crop => (
+                                    <MyCropDetailCard key={crop.id} data={crop} />
+                                ))}
+
+                                {/* Add New Crop Card */}
+                                <div className={`border-2 border-dashed border-slate-300 rounded-2xl flex flex-col justify-center items-center text-slate-400 hover:text-primary-600 hover:border-primary-300 hover:bg-primary-50/50 transition-colors cursor-pointer group ${layout === 'grid' ? 'h-full min-h-[400px]' : 'py-12'}`}>
+                                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 mb-4 group-hover:scale-110 transition-transform">
+                                        <Plus className="w-8 h-8 text-slate-400 group-hover:text-primary-600" />
+                                    </div>
+                                    <h4 className="text-lg font-bold text-slate-600 group-hover:text-primary-600 mb-1">Add New Crop Plot</h4>
+                                    <p className="text-sm font-medium">Link a new field via GPS coordinates</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* History Table */}
+                        <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+                            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                <h3 className="text-xl font-extrabold text-slate-900">Recent Bio-Fertilizer & Microbe Treatments</h3>
+                                <button className="text-sm border border-primary-200 bg-white font-bold text-primary-600 px-4 py-1.5 rounded-full hover:bg-primary-50 transition-colors shadow-sm">
+                                    View Full History →
+                                </button>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-white border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                            <th className="p-4 pl-6">TREATMENT DATE</th>
+                                            <th className="p-4">PLOT ID</th>
+                                            <th className="p-4">PRODUCT TYPE</th>
+                                            <th className="p-4">MICROBE FOCUS</th>
+                                            <th className="p-4">DOSAGE</th>
+                                            <th className="p-4 pr-6 text-right">STATUS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {treatmentHistory.map((row) => (
+                                            <tr key={row.id} className="hover:bg-slate-50/80 transition-colors">
+                                                <td className="p-4 pl-6 font-medium text-slate-600">{row.date}</td>
+                                                <td className="p-4 font-bold text-slate-900">{row.plot}</td>
+                                                <td className="p-4 font-bold text-primary-700">{row.product}</td>
+                                                <td className="p-4 text-sm text-slate-600">{row.focus}</td>
+                                                <td className="p-4 font-medium text-slate-900">{row.dosage}</td>
+                                                <td className="p-4 pr-6 text-right">
+                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 border border-green-200 text-xs font-bold rounded-full uppercase">
+                                                        <CheckCircle2 className="w-3.5 h-3.5" />
+                                                        {row.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </main>
+
+                {/* Sticky FAB from My Crops */}
+                <div className="fixed bottom-8 right-8 z-30">
+                    <button className="bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/30 font-bold px-6 py-4 rounded-full flex items-center gap-2 transition-transform hover:-translate-y-1">
+                        <Plus className="w-6 h-6" />
+                        Add New Crop
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default DashboardPage;

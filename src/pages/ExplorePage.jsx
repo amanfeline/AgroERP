@@ -2,7 +2,7 @@ import Sidebar from '../components/Sidebar';
 import Topbar from '../components/Topbar';
 import { ExploreCropCard } from '../components/CropCard';
 import { exploreCrops } from '../data/mockData';
-import { Sprout, TrendingUp, HandCoins, Building2, Sun } from 'lucide-react';
+import { Sprout, TrendingUp, HandCoins, Building2, Sun, Droplets, MapPin } from 'lucide-react';
 import { useWeatherPrediction } from '../hooks/useWeatherPrediction';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -59,22 +59,54 @@ const ExplorePage = () => {
 
                 <main className="flex-1 p-8">
                     <div className="max-w-7xl mx-auto space-y-8">
-                        {/* Hero Banner */}
-                        <div className="w-full bg-slate-900 rounded-2xl overflow-hidden relative shadow-md min-h-[280px] p-10 flex flex-col justify-end">
+                        {/* Hero Banner - Kharif Season */}
+                        <div className="w-full rounded-2xl overflow-hidden relative shadow-xl min-h-[300px] p-10 flex flex-col justify-end" style={{ background: 'linear-gradient(135deg, #0d3320 0%, #1a5c38 50%, #0f4028 100%)' }}>
+                            {/* Background farm image */}
                             <div
-                                className="absolute inset-0 bg-cover bg-center opacity-50 mix-blend-overlay"
-                                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1592982537447-67210fb9c782?q=80&w=1500&auto=format&fit=crop')" }}
+                                className="absolute inset-0 bg-cover bg-center opacity-15"
+                                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1500&auto=format&fit=crop')" }}
                             ></div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+                            {/* Green glow orbs */}
+                            <div className="absolute -top-16 -right-16 w-72 h-72 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #4ade80 0%, transparent 70%)' }}></div>
+                            <div className="absolute -bottom-10 left-[35%] w-48 h-48 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #86efac 0%, transparent 70%)' }}></div>
+                            {/* Bottom fade */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                            {/* Season badge top-right */}
+                            <div className="absolute top-6 right-8 flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)' }}>
+                                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                                <span className="text-green-300 text-xs font-bold uppercase tracking-widest">Season Active</span>
+                            </div>
 
                             <div className="relative z-10">
-                                <span className="inline-block px-3 py-1 bg-primary-500 text-white text-[10px] font-black uppercase tracking-widest rounded mb-4">
-                                    SEASONAL FOCUS
+                                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-lg mb-4 text-[10px] font-black uppercase tracking-widest text-green-200" style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                                    <span className="material-symbols-outlined text-[12px] text-green-300">calendar_month</span>
+                                    SEASONAL FOCUS · KHARIF 2025
                                 </span>
-                                <h1 className="text-4xl font-black text-white mb-3">Kharif Season Preparation</h1>
-                                <p className="text-slate-200 font-medium max-w-2xl text-lg">
+                                <h1 className="text-4xl font-black text-white mb-3 drop-shadow-lg">Kharif Season Preparation</h1>
+                                <p className="text-green-100/80 font-medium max-w-2xl text-base mb-6">
                                     Get ahead of the curve. Analyze soil moisture predictions and discover the best yielding crops for your specific region before planting begins.
                                 </p>
+                                {/* Stat chips */}
+                                <div className="flex flex-wrap gap-3">
+                                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                                        <Droplets className="w-4 h-4 text-blue-300" />
+                                        <span className="text-white text-xs font-bold">Monsoon Onset: Jun 5</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                                        <Sun className="w-4 h-4 text-amber-300" />
+                                        <span className="text-white text-xs font-bold">Avg Temp: 28°C</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                                        <Sprout className="w-4 h-4 text-green-300" />
+                                        <span className="text-white text-xs font-bold">10 Crops Recommended</span>
+                                    </div>
+                                    {user?.location && (
+                                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                                            <MapPin className="w-4 h-4 text-green-300" />
+                                            <span className="text-white text-xs font-bold">{user.location}</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
@@ -186,22 +218,26 @@ const ExplorePage = () => {
                                     <div className="space-y-4 mb-6">
                                         {isPricesLoading ? (
                                             <div className="text-center text-sm text-slate-500 py-4">Loading live trends...</div>
-                                        ) : livePrices.slice(0, 3).map((item, idx) => (
-                                            <div key={idx} className="flex justify-between items-center group cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-lg transition-colors">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
-                                                        <TrendingUp className="w-4 h-4" />
+                                        ) : (livePrices || []).length > 0 ? (
+                                            (livePrices || []).slice(0, 3).map((item, idx) => (
+                                                <div key={idx} className="flex justify-between items-center group cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-lg transition-colors">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                                                            <TrendingUp className="w-4 h-4" />
+                                                        </div>
+                                                        <p className="font-bold text-slate-900">{item.commodity}</p>
                                                     </div>
-                                                    <p className="font-bold text-slate-900">{item.commodity}</p>
+                                                    <div className="text-right">
+                                                        <p className="font-bold">${item.price.toFixed(2)}</p>
+                                                        <p className={`text-xs font-bold ${item.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                                            {item.change >= 0 ? '+' : ''}{item.change}%
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div className="text-right">
-                                                    <p className="font-bold">${item.price.toFixed(2)}</p>
-                                                    <p className={`text-xs font-bold ${item.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                                        {item.change >= 0 ? '+' : ''}{item.change}%
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        ))}
+                                            ))
+                                        ) : (
+                                            <div className="text-center text-sm text-slate-400 py-4">Market data unavailable</div>
+                                        )}
                                     </div>
                                     <button className="relative z-10 w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 rounded-xl transition-colors">
                                         Full Market Report

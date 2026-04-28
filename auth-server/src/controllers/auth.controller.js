@@ -32,9 +32,24 @@ const sha256 = (str) =>
  * Returns 201 with { success, message, user }.
  */
 export const register = asyncHandler(async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, landSize, location, plantedCrop } = req.body;
 
-  const user = await User.create({ name, email, password, role });
+  // 1. Check if user already exists
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new AppError('Email is already in use', 400);
+  }
+
+  // 2. Create the user
+  const user = await User.create({
+    name,
+    email,
+    password,
+    role,
+    landSize: landSize ? Number(landSize) : 0,
+    location: location || '',
+    plantedCrop: plantedCrop || ''
+  });
 
   res.status(201).json({
     success: true,

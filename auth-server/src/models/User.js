@@ -41,6 +41,20 @@ const userSchema = new Schema(
       type: Boolean,
       default: true,
     },
+    landSize: {
+      type: Number,
+      default: 0,
+    },
+    location: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    plantedCrop: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     // Password-reset fields — hidden by default
     resetToken: {
       type: String,

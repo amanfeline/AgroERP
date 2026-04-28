@@ -173,17 +173,19 @@ const ProfilePage = () => {
                                 <label className="block text-sm font-bold text-slate-500 uppercase tracking-widest mb-2">Location</label>
                                 {isEditing ? (
                                     <div className="flex items-center gap-2 max-w-md">
-                                        <input type="text" name="location" value={formData.location} onChange={handleChange} className="flex-1 h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-medium outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500" placeholder="District, State, Country" />
-                                        <button 
-                                            type="button" 
-                                            onClick={handleGetLocation} 
-                                            disabled={isFetchingLocation}
-                                            className="h-10 px-3 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-slate-700 font-bold text-xs flex items-center gap-1.5 transition-colors disabled:opacity-50"
-                                            title="Auto-detect Location"
-                                        >
-                                            <span className="material-symbols-outlined text-base" style={{ fontSize: '18px' }}>{isFetchingLocation ? 'hourglass_empty' : 'my_location'}</span>
-                                            {isFetchingLocation ? 'Fetching...' : 'Auto'}
-                                        </button>
+                                        <select name="location" value={formData.location} onChange={handleChange} className="flex-1 h-10 px-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-medium outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
+                                            <option value="">Select a Location</option>
+                                            <option value="Punjab, India">Punjab, India</option>
+                                            <option value="Haryana, India">Haryana, India</option>
+                                            <option value="Uttar Pradesh, India">Uttar Pradesh, India</option>
+                                            <option value="Maharashtra, India">Maharashtra, India</option>
+                                            <option value="California, USA">California, USA</option>
+                                            <option value="Texas, USA">Texas, USA</option>
+                                            <option value="Mato Grosso, Brazil">Mato Grosso, Brazil</option>
+                                            <option value="Buenos Aires, Argentina">Buenos Aires, Argentina</option>
+                                            <option value="Queensland, Australia">Queensland, Australia</option>
+                                            <option value="Sichuan, China">Sichuan, China</option>
+                                        </select>
                                     </div>
                                 ) : (
                                     <p className="font-medium text-slate-900">{user.location || "Location not specified"}</p>

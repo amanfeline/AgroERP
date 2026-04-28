@@ -1,77 +1,90 @@
-// Initialize mock DB if it doesn't exist
-const getMockUsers = () => JSON.parse(localStorage.getItem('mockUsers') || '[]');
-const saveMockUsers = (users) => localStorage.setItem('mockUsers', JSON.stringify(users));
+const BASE_URL = 'http://localhost:8000/api/v1/auth';
+
+export const register = async (userData) => {
+    const response = await fetch(`${BASE_URL}/register`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+    }
+    return data;
+};
 
 export const login = async (email, password) => {
-    // Simulate network delay
-    await new Promise(r => setTimeout(r, 500));
-    
-    const users = getMockUsers();
-    const user = users.find(u => u.email === email && u.password === password);
-    
-    if (user) {
-        return {
-            success: true,
-            accessToken: "mock_jwt_" + Date.now(),
-            user: { ...user, password: undefined } // strip password
-        };
-    } else {
-        throw new Error("Invalid email or password. Please register first!");
+    const response = await fetch(`${BASE_URL}/login`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
     }
+    return data;
 };
 
-export const googleLogin = async () => {
-    await new Promise(r => setTimeout(r, 500));
+export const googleLogin = async (name, email) => {
+    // Simulate OAuth delay
+    await new Promise(r => setTimeout(r, 800));
     
-    const users = getMockUsers();
-    const mockEmail = `googleuser_${Date.now()}@gmail.com`;
-    
-    const newUser = {
-        _id: Date.now().toString(),
-        name: "Google User",
-        email: mockEmail,
-        role: "farmer",
-        isActive: true,
-        createdAt: new Date().toISOString()
-    };
-    
-    users.push(newUser);
-    saveMockUsers(users);
-    
-    return {
-        success: true,
-        accessToken: "mock_jwt_google_" + Date.now(),
-        user: newUser
-    };
-};
+    // Register a mock user in the backend to establish a session
+    const response = await fetch(`${BASE_URL}/register`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name: name,
+            email: email,
+            password: 'google_oauth_mock_password_123', // required by backend validation
+            role: 'farmer',
+            landSize: 10,
+            location: 'Unknown Location',
+            plantedCrop: 'Mixed'
+        }),
+    });
 
-export const register = async (name, email, password, role = 'farmer') => {
-    await new Promise(r => setTimeout(r, 500));
-    
-    const users = getMockUsers();
-    if (users.some(u => u.email === email)) {
-        throw new Error("Email is already registered. Please login.");
+    const data = await response.json();
+    // If it's not a success and not a duplicate email conflict (409), throw error
+    if (!response.ok && response.status !== 409) {
+        throw new Error(data.message || 'Google Login failed during registration');
     }
     
-    const newUser = {
-        _id: Date.now().toString(),
-        name,
-        email,
-        password,
-        role,
-        isActive: true,
-        createdAt: new Date().toISOString()
-    };
+    // The register endpoint does not return an accessToken directly, so we need to login
+    const loginResponse = await fetch(`${BASE_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: 'google_oauth_mock_password_123' }),
+    });
+
+    const loginData = await loginResponse.json();
+    if (!loginResponse.ok) {
+        throw new Error(loginData.message || 'Google Login failed');
+    }
     
-    users.push(newUser);
-    saveMockUsers(users);
-    
-    return { success: true };
+    return loginData;
 };
 
 export const getMe = async (token) => {
-    return {
-        success: true,
-        user: getMockUsers()[0] || null // Just return first user for persistence simulation
-    };
+    const response = await fetch(`${BASE_URL}/me`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch user profile');
+    }
+    return data;
 };

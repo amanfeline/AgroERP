@@ -3,15 +3,47 @@ import Topbar from '../components/Topbar';
 import WeatherPredictionCard from '../components/WeatherPredictionCard';
 import CropProgressTimeline from '../components/CropProgressTimeline';
 import { MarketInsightCard, MyCropDetailCard } from '../components/CropCard';
-import { marketInsights, myCropsList, treatmentHistory } from '../data/mockData';
 import { useWeatherPrediction } from '../hooks/useWeatherPrediction';
+import { useAuth } from '../context/AuthContext';
 import { NavLink } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LayoutGrid, List, Plus, CheckCircle2 } from 'lucide-react';
 
 const DashboardPage = () => {
+    const { user } = useAuth();
     const [layout, setLayout] = useState('grid');
-    const { prediction, isLoading } = useWeatherPrediction();
+    const { prediction, isLoading: isWeatherLoading } = useWeatherPrediction();
+
+    const [dashboardData, setDashboardData] = useState(null);
+    const [myCrops, setMyCrops] = useState([]);
+    const [marketData, setMarketData] = useState([]);
+    const [isLoadingData, setIsLoadingData] = useState(true);
+
+    useEffect(() => {
+        const fetchDashboardInfo = async () => {
+            if (!user) return;
+            try {
+                const resDashboard = await fetch(`http://localhost:8000/api/dashboard?email=${user.email}`);
+                const dataDashboard = await resDashboard.json();
+                
+                const resCrops = await fetch(`http://localhost:8000/api/crops?email=${user.email}`);
+                const dataCrops = await resCrops.json();
+                
+                const resMarket = await fetch(`http://localhost:8000/api/market-prices`);
+                const dataMarket = await resMarket.json();
+
+                if (dataDashboard.success) setDashboardData(dataDashboard.data);
+                if (dataCrops.success) setMyCrops(dataCrops.data);
+                if (dataMarket.success) setMarketData(dataMarket.data.slice(0, 3)); // Show top 3
+            } catch (err) {
+                console.error("Failed to fetch dashboard data", err);
+            } finally {
+                setIsLoadingData(false);
+            }
+        };
+
+        fetchDashboardInfo();
+    }, [user]);
 
     return (
         <div className="flex h-screen bg-[#edf5f0] overflow-hidden">
@@ -24,7 +56,7 @@ const DashboardPage = () => {
 
                         {/* Left Column (70%) */}
                         <div className="w-full lg:w-8/12 flex flex-col gap-6">
-                            <WeatherPredictionCard weatherData={prediction} isLoading={isLoading} />
+                            <WeatherPredictionCard weatherData={prediction} isLoading={isWeatherLoading} />
                             <CropProgressTimeline />
 
                             <section className="mt-2">
@@ -35,9 +67,13 @@ const DashboardPage = () => {
                                     </NavLink>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                    {marketInsights.map((insight) => (
-                                        <MarketInsightCard key={insight.id} data={insight} />
-                                    ))}
+                                    {isLoadingData ? (
+                                        <p className="text-slate-500">Loading market trends...</p>
+                                    ) : (
+                                        marketData.map((insight) => (
+                                            <MarketInsightCard key={insight.id} data={insight} />
+                                        ))
+                                    )}
                                 </div>
                             </section>
                         </div>
@@ -63,7 +99,7 @@ const DashboardPage = () => {
                                             <div>
                                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Crop Suitability</p>
                                                 <p className="text-2xl font-black text-slate-900">
-                                                    {isLoading || !prediction ? '...' : `${Math.round(prediction.crop_suitability_score)}%`}
+                                                    {isWeatherLoading || !prediction ? '...' : `${Math.round(prediction.crop_suitability_score)}%`}
                                                 </p>
                                             </div>
                                         </div>
@@ -118,9 +154,9 @@ const DashboardPage = () => {
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
                                             <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Total Active Acres</p>
-                                            <h3 className="text-3xl font-black text-slate-900">1,240</h3>
+                                            <h3 className="text-3xl font-black text-slate-900">{isLoadingData ? '...' : dashboardData?.metrics?.totalActiveAcres}</h3>
                                         </div>
-                                        <span className="px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-md">+5.2%</span>
+                                        <span className="px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-md">{dashboardData?.metrics?.acresTrend || '+0%'}</span>
                                     </div>
                                     <div className="w-full bg-slate-100 rounded-full h-2">
                                         <div className="bg-primary-500 h-2 rounded-full w-[85%]"></div>
@@ -137,9 +173,9 @@ const DashboardPage = () => {
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
                                             <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Avg. Soil Health Score</p>
-                                            <h3 className="text-3xl font-black text-slate-900">88%</h3>
+                                            <h3 className="text-3xl font-black text-slate-900">{isLoadingData ? '...' : `${dashboardData?.metrics?.avgSoilHealth}%`}</h3>
                                         </div>
-                                        <span className="px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-md">+2.1%</span>
+                                        <span className="px-2 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-md">{dashboardData?.metrics?.soilTrend || '+0%'}</span>
                                     </div>
                                     <div className="w-full bg-slate-100 rounded-full h-2">
                                         <div className="bg-primary-500 h-2 rounded-full w-[88%]"></div>
@@ -156,9 +192,9 @@ const DashboardPage = () => {
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
                                             <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Bio-Fertilizer Usage</p>
-                                            <h3 className="text-3xl font-black text-slate-900">450L</h3>
+                                            <h3 className="text-3xl font-black text-slate-900">{isLoadingData ? '...' : `${dashboardData?.metrics?.bioFertilizerUsage}L`}</h3>
                                         </div>
-                                        <span className="px-2 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-md">-3.4%</span>
+                                        <span className="px-2 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-md">{dashboardData?.metrics?.fertilizerTrend || '-0%'}</span>
                                     </div>
                                     <div className="w-full bg-slate-100 rounded-full h-2">
                                         <div className="bg-blue-500 h-2 rounded-full w-[45%]"></div>
@@ -191,9 +227,13 @@ const DashboardPage = () => {
                             </div>
 
                             <div className={`grid gap-6 ${layout === 'grid' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
-                                {myCropsList.map(crop => (
-                                    <MyCropDetailCard key={crop.id} data={crop} />
-                                ))}
+                                {isLoadingData ? (
+                                    <p className="text-slate-500 p-4">Loading crops...</p>
+                                ) : (
+                                    myCrops.map(crop => (
+                                        <MyCropDetailCard key={crop.id} data={crop} />
+                                    ))
+                                )}
 
                                 {/* Add New Crop Card */}
                                 <div className={`border-2 border-dashed border-slate-300 rounded-2xl flex flex-col justify-center items-center text-slate-400 hover:text-primary-600 hover:border-primary-300 hover:bg-primary-50/50 transition-colors cursor-pointer group ${layout === 'grid' ? 'h-full min-h-[400px]' : 'py-12'}`}>
@@ -227,21 +267,25 @@ const DashboardPage = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
-                                        {treatmentHistory.map((row) => (
-                                            <tr key={row.id} className="hover:bg-slate-50/80 transition-colors">
-                                                <td className="p-4 pl-6 font-medium text-slate-600">{row.date}</td>
-                                                <td className="p-4 font-bold text-slate-900">{row.plot}</td>
-                                                <td className="p-4 font-bold text-primary-700">{row.product}</td>
-                                                <td className="p-4 text-sm text-slate-600">{row.focus}</td>
-                                                <td className="p-4 font-medium text-slate-900">{row.dosage}</td>
-                                                <td className="p-4 pr-6 text-right">
-                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 border border-green-200 text-xs font-bold rounded-full uppercase">
-                                                        <CheckCircle2 className="w-3.5 h-3.5" />
-                                                        {row.status}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {isLoadingData ? (
+                                            <tr><td colSpan="6" className="p-4 text-center text-slate-500">Loading history...</td></tr>
+                                        ) : (
+                                            dashboardData?.treatmentHistory?.map((row) => (
+                                                <tr key={row.id} className="hover:bg-slate-50/80 transition-colors">
+                                                    <td className="p-4 pl-6 font-medium text-slate-600">{row.date}</td>
+                                                    <td className="p-4 font-bold text-slate-900">{row.plot}</td>
+                                                    <td className="p-4 font-bold text-primary-700">{row.product}</td>
+                                                    <td className="p-4 text-sm text-slate-600">{row.focus}</td>
+                                                    <td className="p-4 font-medium text-slate-900">{row.dosage}</td>
+                                                    <td className="p-4 pr-6 text-right">
+                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 border border-green-200 text-xs font-bold rounded-full uppercase">
+                                                            <CheckCircle2 className="w-3.5 h-3.5" />
+                                                            {row.status}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             </div>

@@ -4,11 +4,41 @@ import { ExploreCropCard } from '../components/CropCard';
 import { exploreCrops } from '../data/mockData';
 import { Sprout, TrendingUp, HandCoins, Building2, Sun } from 'lucide-react';
 import { useWeatherPrediction } from '../hooks/useWeatherPrediction';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 const ExplorePage = () => {
     const { prediction } = useWeatherPrediction();
+    const { user } = useAuth();
     const [filterAiMatch, setFilterAiMatch] = useState(false);
+    const [engineData, setEngineData] = useState({ profitableCrops: [], optimizedRecommendations: [] });
+
+    useEffect(() => {
+        const fetchRecommendations = async () => {
+            if (!user) return; 
+
+            try {
+                const response = await fetch('http://localhost:8000/api/recommendations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        location: user.location || 'Unknown',
+                        soilType: user.soilType || 'Alluvial',
+                        landSize: user.landCapacity || '10'
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    setEngineData(result.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch smart recommendations:", error);
+            }
+        };
+
+        fetchRecommendations();
+    }, [user]);
 
     // Simulate matching some crops randomly since we don't have enough backend model granularity for every individual string crop name
     const isAiMatch = prediction?.best_sowing_window === 'optimal';
@@ -85,32 +115,28 @@ const ExplorePage = () => {
                                 <section>
                                     <h3 className="text-xl font-black text-slate-900 mb-6">Smart Recommendations</h3>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                        <div className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-primary-500 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer group shadow-md flex gap-4 relative overflow-hidden">
-                                            <div
-                                                className="absolute inset-0 bg-cover bg-center opacity-5 group-hover:opacity-15 transition-opacity duration-300 mix-blend-overlay"
-                                                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1599370126788-b4babe8c0c45?q=80&w=300&auto=format&fit=crop')" }}
-                                            ></div>
-                                            <div className="w-12 h-12 shrink-0 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500 group-hover:bg-amber-100 transition-colors relative z-10">
-                                                <Sun className="w-6 h-6" />
+                                        {engineData.optimizedRecommendations.length > 0 ? (
+                                            engineData.optimizedRecommendations.map((rec, idx) => (
+                                                <div key={idx} className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-primary-500 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer group shadow-md flex gap-4 relative overflow-hidden">
+                                                    <div
+                                                        className="absolute inset-0 bg-cover bg-center opacity-5 group-hover:opacity-15 transition-opacity duration-300 mix-blend-overlay"
+                                                        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1592982537447-67210fb9c782?q=80&w=300&auto=format&fit=crop')" }}
+                                                    ></div>
+                                                    <div className={`w-12 h-12 shrink-0 rounded-xl flex items-center justify-center relative z-10 transition-colors 
+                                                        ${rec.iconType === 'sun' ? 'bg-amber-50 text-amber-500 group-hover:bg-amber-100' : 'bg-blue-50 text-blue-500 group-hover:bg-blue-100'}`}>
+                                                        {rec.iconType === 'sun' ? <Sun className="w-6 h-6" /> : <Sprout className="w-6 h-6" />}
+                                                    </div>
+                                                    <div className="relative z-10">
+                                                        <h4 className="font-bold text-slate-900 mb-1 leading-tight group-hover:text-primary-600 transition-colors">{rec.title}</h4>
+                                                        <p className="text-sm text-slate-500 font-medium leading-relaxed">{rec.description}</p>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="col-span-full p-6 text-center text-slate-500 bg-white rounded-2xl border border-slate-200">
+                                                Loading smart recommendations...
                                             </div>
-                                            <div className="relative z-10">
-                                                <h4 className="font-bold text-slate-900 mb-1 leading-tight group-hover:text-primary-600 transition-colors">Delay planting by 4 days</h4>
-                                                <p className="text-sm text-slate-500 font-medium leading-relaxed">Incoming heavy rainfall predicted on Thursday. Wait for optimal soil moisture balance.</p>
-                                            </div>
-                                        </div>
-                                        <div className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-primary-500 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer group shadow-md flex gap-4 relative overflow-hidden">
-                                            <div
-                                                className="absolute inset-0 bg-cover bg-center opacity-5 group-hover:opacity-15 transition-opacity duration-300 mix-blend-overlay"
-                                                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1592982537447-67210fb9c782?q=80&w=300&auto=format&fit=crop')" }}
-                                            ></div>
-                                            <div className="w-12 h-12 shrink-0 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 group-hover:bg-blue-100 transition-colors relative z-10">
-                                                <Sprout className="w-6 h-6" />
-                                            </div>
-                                            <div className="relative z-10">
-                                                <h4 className="font-bold text-slate-900 mb-1 leading-tight group-hover:text-primary-600 transition-colors">Switch to Organic Fertilizer</h4>
-                                                <p className="text-sm text-slate-500 font-medium leading-relaxed">Your soil nitrogen levels are stabilizing. A gentle organic boost is recommended over synthetics.</p>
-                                            </div>
-                                        </div>
+                                        )}
                                     </div>
                                 </section>
                             </div>

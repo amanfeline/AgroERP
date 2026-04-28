@@ -6,6 +6,11 @@ import cors from 'cors';
 
 import authRoutes from './routes/auth.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import marketRoutes from './routes/market.routes.js';
+import recommendationsRoutes from './routes/recommendations.routes.js';
+import dashboardRoutes from './routes/dashboard.routes.js';
+import cropsRoutes from './routes/crops.routes.js';
+import weatherRoutes from './routes/weather.routes.js';
 import { AppError } from './utils/error.js';
 
 const app = express();
@@ -13,7 +18,7 @@ const app = express();
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'http://localhost:5174'],
     credentials: true,          // allow cookies / Authorization headers
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -37,6 +42,11 @@ app.get('/api/health', (_req, res) => {
 // ─── API Routes ───────────────────────────────────────────────────────────────
 app.use('/api/v1/auth',  authRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/market-prices', marketRoutes);
+app.use('/api/recommendations', recommendationsRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/crops', cropsRoutes);
+app.use('/predict', weatherRoutes);
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 app.all('*', (req, _res, next) => {

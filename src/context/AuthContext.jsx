@@ -47,9 +47,9 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const googleLogin = async () => {
+    const googleLogin = async (name, email) => {
         try {
-            const data = await googleLoginApi();
+            const data = await googleLoginApi(name, email);
             if (data.success) {
                 setToken(data.accessToken);
                 setUser(data.user);
@@ -62,11 +62,12 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const register = async (name, email, password, role) => {
+    const register = async (name, email, password, role, landSize, location, plantedCrop) => {
         try {
-            const data = await registerApi(name, email, password, role);
+            const data = await registerApi({ name, email, password, role, landSize, location, plantedCrop });
             if (data.success) {
-                return { success: true };
+                // Auto login immediately after successful registration
+                return await login(email, password);
             }
             return { success: false, message: data.message };
         } catch (error) {

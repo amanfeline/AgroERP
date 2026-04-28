@@ -4,12 +4,17 @@
 import 'dotenv/config';
 import connectDB from './config/db.js';
 import app from './app.js';
+import { loadData, saveData } from './utils/persistence.js';
 
 const PORT = process.env.PORT || 8000;
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 const startServer = async () => {
   await connectDB();
+  await loadData();
+  
+  // Save database memory to JSON file every 5 seconds
+  setInterval(saveData, 5000);
 
   const server = app.listen(PORT, () => {
     console.log(`\n🚀 AgroERP Auth Server`);

@@ -10,8 +10,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
  */
 const connectDB = async () => {
   try {
-    const uri = process.env.MONGO_URI;
-    
+    const uri = process.env.MONGODB_URI || process.env.MONGO_URI;
     try {
       console.log('Attempting to connect to primary MongoDB...');
       // Try to connect with a short timeout to fail fast if credentials are wrong
@@ -23,7 +22,7 @@ const connectDB = async () => {
       console.log('🔄 Falling back to local in-memory database...');
     }
 
-    // Fallback: Start an in-memory MongoDB instance
+    // Fallback: Start an in-memory MongoDB instance (persistence handled by JSON dump)
     const mongoServer = await MongoMemoryServer.create();
     const fallbackUri = mongoServer.getUri();
     

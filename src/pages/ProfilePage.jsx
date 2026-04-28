@@ -64,46 +64,6 @@ const ProfilePage = () => {
         }
     };
 
-    const handleGetLocation = () => {
-        if (!navigator.geolocation) {
-            alert("Geolocation is not supported by your browser");
-            return;
-        }
-
-        setIsFetchingLocation(true);
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                try {
-                    const { latitude, longitude } = position.coords;
-                    // Using free OpenStreetMap Nominatim API for reverse geocoding to avoid needing a Google API key
-                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-                    const data = await response.json();
-                    
-                    if (data && data.address) {
-                        const country = data.address.country || '';
-                        const state = data.address.state || '';
-                        const district = data.address.state_district || data.address.county || data.address.city_district || data.address.city || '';
-                        
-                        // Filter out empty strings and join with comma
-                        const locationString = [district, state, country].filter(Boolean).join(', ');
-                        setFormData(prev => ({ ...prev, location: locationString }));
-                    } else {
-                        alert("Could not determine address from location");
-                    }
-                } catch (error) {
-                    console.error(error);
-                    alert("Error fetching location details");
-                } finally {
-                    setIsFetchingLocation(false);
-                }
-            },
-            (error) => {
-                console.error(error);
-                alert("Unable to retrieve your location. Please ensure location permissions are granted in your browser.");
-                setIsFetchingLocation(false);
-            }
-        );
-    };
 
     if (!user) return null;
 
@@ -269,16 +229,6 @@ const ProfilePage = () => {
                     </div>
                 </main>
             </div>
-            {showPicViewer && (
-                <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
-                    <div className="relative max-w-4xl max-h-full">
-                        <button onClick={() => setShowPicViewer(false)} className="absolute -top-12 right-0 text-white hover:text-slate-300 font-bold bg-black/50 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
-                            ✕
-                        </button>
-                        <img src={isEditing ? formData.avatarUrl || user.avatarUrl || 'https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?q=80&w=250&auto=format&fit=crop' : user.avatarUrl || 'https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?q=80&w=250&auto=format&fit=crop'} alt="Profile View" className="max-w-full max-h-[85vh] rounded-lg shadow-2xl object-contain ring-4 ring-white/10" />
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

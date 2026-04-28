@@ -9,6 +9,7 @@ import { useState } from 'react';
 const MarketPricesPage = () => {
     const { data: liveData } = useLivePrices();
     const [showReportModal, setShowReportModal] = useState(false);
+    const [showAlertModal, setShowAlertModal] = useState(false);
     
     const wheatData = liveData?.find(d => d.commodity.includes('Wheat')) || { price: 214.50, change: 2.4 };
     const riceData = liveData?.find(d => d.commodity.includes('Rice')) || { price: 410.20, change: -0.8 };
@@ -81,7 +82,10 @@ const MarketPricesPage = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="bg-primary-900 min-h-[256px] rounded-2xl border border-primary-800 shadow-md relative overflow-hidden group hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary-900/40 transition-all duration-300 flex flex-col justify-end p-8 cursor-pointer">
+                            <div 
+                                onClick={() => setShowAlertModal(true)}
+                                className="bg-primary-900 min-h-[256px] rounded-2xl border border-primary-800 shadow-md relative overflow-hidden group hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary-900/40 transition-all duration-300 flex flex-col justify-end p-8 cursor-pointer"
+                            >
                                 <div
                                     className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-40 transition-transform duration-700 group-hover:scale-105 mix-blend-overlay"
                                     style={{ backgroundImage: "url('https://images.unsplash.com/photo-1518398046578-8cca57782e17?q=80&w=1500&auto=format&fit=crop')" }}
@@ -148,6 +152,79 @@ const MarketPricesPage = () => {
                                 <div className="p-4 bg-primary-50 rounded-xl border border-primary-200">
                                     <h4 className="font-bold text-primary-900 mb-2">AI Market Prediction</h4>
                                     <p className="text-sm text-primary-800">Based on our ML models, the overall cereal index is expected to grow by 1.2% by end of week due to increased global demand and localized weather events in key producing regions.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {/* Soybean Alert Analysis Modal */}
+                {showAlertModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+                        <div className="bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-red-900/50">
+                            <div className="p-6 border-b border-red-900/40 flex justify-between items-center" style={{ background: 'linear-gradient(135deg, #1a0a0a 0%, #2d0f0f 100%)' }}>
+                                <div>
+                                    <div className="flex items-center gap-3 mb-1">
+                                        <span className="px-2.5 py-1 bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] font-black uppercase tracking-widest rounded">🚨 MARKET ALERT</span>
+                                        <span className="text-xs text-slate-500 font-medium">Live Analysis</span>
+                                    </div>
+                                    <h2 className="text-2xl font-black text-white">Soybean Logistics Delay</h2>
+                                    <p className="text-sm text-red-400 font-medium">Port congestion crisis — Santos & Paranaguá, Brazil</p>
+                                </div>
+                                <button onClick={() => setShowAlertModal(false)} className="p-2 text-slate-500 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+                            <div className="p-6 overflow-y-auto space-y-6">
+
+                                {/* Impact Grid */}
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-center">
+                                        <p className="text-xs text-red-400 font-bold uppercase tracking-wider mb-1">Price Surge</p>
+                                        <p className="text-2xl font-black text-red-300">+4.2%</p>
+                                        <p className="text-[10px] text-slate-500 font-medium mt-1">vs last week</p>
+                                    </div>
+                                    <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl text-center">
+                                        <p className="text-xs text-amber-400 font-bold uppercase tracking-wider mb-1">Delay</p>
+                                        <p className="text-2xl font-black text-amber-300">8-12d</p>
+                                        <p className="text-[10px] text-slate-500 font-medium mt-1">estimated backlog</p>
+                                    </div>
+                                    <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl text-center">
+                                        <p className="text-xs text-blue-400 font-bold uppercase tracking-wider mb-1">Volume Hit</p>
+                                        <p className="text-2xl font-black text-blue-300">3.2MT</p>
+                                        <p className="text-[10px] text-slate-500 font-medium mt-1">cargo affected</p>
+                                    </div>
+                                </div>
+
+                                {/* Root Cause */}
+                                <div className="space-y-3">
+                                    <h3 className="font-bold text-white border-b border-slate-700 pb-2">Root Cause Analysis</h3>
+                                    <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                                        <div className="flex items-start gap-3">
+                                            <span className="text-red-400 text-lg mt-0.5">⚠</span>
+                                            <div>
+                                                <p className="font-bold text-white mb-1">Port Congestion — Santos & Paranaguá</p>
+                                                <p className="text-sm text-slate-400">A combination of truck driver strikes and unusually high harvest volumes has caused a severe backlog at Brazil's two largest soybean export terminals. Over 180 vessels are currently waiting at anchorage.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                                        <div className="flex items-start gap-3">
+                                            <span className="text-amber-400 text-lg mt-0.5">📈</span>
+                                            <div>
+                                                <p className="font-bold text-white mb-1">Indian Market Impact</p>
+                                                <p className="text-sm text-slate-400">Indian soybean futures on NCDEX have already reacted with a 2.8% intraday spike. Domestic crush margins are expected to improve temporarily, benefiting local processors in Madhya Pradesh and Rajasthan.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* AI Outlook */}
+                                <div className="p-4 rounded-xl border" style={{ background: 'rgba(220, 38, 38, 0.08)', borderColor: 'rgba(220, 38, 38, 0.25)' }}>
+                                    <h4 className="font-bold text-red-400 mb-2 flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-base">smart_toy</span>
+                                        AI Strategic Outlook
+                                    </h4>
+                                    <p className="text-sm text-slate-300">This disruption is expected to last 10–14 days before normalising. Traders should consider short-term long positions on domestic soybean. Farmers holding soy stocks may benefit from holding for 1–2 weeks before selling. Monitor ANEC (Brazil export agency) daily updates for resolution timeline.</p>
                                 </div>
                             </div>
                         </div>

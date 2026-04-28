@@ -126,44 +126,89 @@ const DashboardPage = () => {
                                 </div>
                             </div>
 
-                            {/* Extra visual filler card for right col */}
-                            <div className="bg-primary-900 rounded-2xl p-6 shadow-md relative overflow-hidden flex-1 min-h-[200px]">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-800 rounded-bl-full opacity-50"></div>
-                                <div className="relative z-10 flex flex-col h-full">
-                                    <span className="material-symbols-outlined text-primary-400 text-3xl mb-2">psychiatry</span>
-                                    <h3 className="text-xl font-bold text-white mb-1">Automated Soil Report Ready</h3>
-                                    <p className="text-xs text-primary-300 font-medium mb-4">Generated 10 minutes ago · satellite imagery</p>
+                            {/* Automated Soil Report Card */}
+                            <div className="rounded-2xl shadow-xl relative overflow-hidden flex-1 flex flex-col" style={{ background: 'linear-gradient(145deg, #0d3320 0%, #1a5c38 60%, #0f4028 100%)' }}>
+                                {/* Subtle farm image overlay */}
+                                <div className="absolute inset-0 bg-cover bg-center opacity-10" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=600&auto=format&fit=crop')" }}></div>
+                                {/* Glow orb */}
+                                <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-25" style={{ background: 'radial-gradient(circle, #4ade80 0%, transparent 70%)' }}></div>
+                                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30"></div>
 
-                                    {/* 3 Key Metrics */}
-                                    <div className="grid grid-cols-3 gap-2 mb-4">
-                                        <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center border border-white/10">
-                                            <p className="text-xs text-primary-300 font-bold uppercase tracking-wider mb-0.5">Health</p>
-                                            <p className="text-xl font-black text-white">88<span className="text-xs">/100</span></p>
-                                            <p className="text-[10px] text-green-400 font-bold">↑ Good</p>
+                                <div className="relative z-10 flex flex-col h-full p-6">
+                                    {/* Header */}
+                                    <div className="flex items-start gap-3 mb-4">
+                                        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(74,222,128,0.15)', border: '1px solid rgba(74,222,128,0.25)' }}>
+                                            <span className="material-symbols-outlined text-green-300 text-[20px]">psychiatry</span>
                                         </div>
-                                        <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center border border-white/10">
-                                            <p className="text-xs text-primary-300 font-bold uppercase tracking-wider mb-0.5">Moisture</p>
-                                            <p className="text-xl font-black text-white">64<span className="text-xs">%</span></p>
-                                            <p className="text-[10px] text-blue-400 font-bold">Optimal</p>
+                                        <div>
+                                            <h3 className="text-base font-bold text-white leading-tight">Automated Soil Report</h3>
+                                            <p className="text-[11px] text-green-300/70 font-medium">Generated 10 min ago · satellite</p>
                                         </div>
-                                        <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center border border-white/10">
-                                            <p className="text-xs text-primary-300 font-bold uppercase tracking-wider mb-0.5">pH</p>
-                                            <p className="text-xl font-black text-white">6.8</p>
-                                            <p className="text-[10px] text-green-400 font-bold">Ideal</p>
+                                        <span className="ml-auto flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold text-green-300" style={{ background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.2)' }}>
+                                            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
+                                            READY
+                                        </span>
+                                    </div>
+
+                                    {/* Horizontal Metric Rows */}
+                                    <div className="space-y-3 flex-1">
+                                        <div className="flex items-center gap-3" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '10px 12px' }}>
+                                            <span className="material-symbols-outlined text-green-400 text-[18px]">favorite</span>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <span className="text-[11px] font-bold text-green-200/70 uppercase tracking-wider">Soil Health</span>
+                                                    <span className="text-sm font-black text-white">88<span className="text-[10px] font-normal">/100</span></span>
+                                                </div>
+                                                <div className="w-full h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                                                    <div className="h-1.5 rounded-full bg-green-400" style={{ width: '88%' }}></div>
+                                                </div>
+                                            </div>
+                                            <span className="text-[10px] font-bold text-green-400 shrink-0">↑ Good</span>
+                                        </div>
+
+                                        <div className="flex items-center gap-3" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '10px 12px' }}>
+                                            <span className="material-symbols-outlined text-blue-400 text-[18px]">water_drop</span>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <span className="text-[11px] font-bold text-green-200/70 uppercase tracking-wider">Moisture</span>
+                                                    <span className="text-sm font-black text-white">64<span className="text-[10px] font-normal">%</span></span>
+                                                </div>
+                                                <div className="w-full h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                                                    <div className="h-1.5 rounded-full bg-blue-400" style={{ width: '64%' }}></div>
+                                                </div>
+                                            </div>
+                                            <span className="text-[10px] font-bold text-blue-400 shrink-0">Optimal</span>
+                                        </div>
+
+                                        <div className="flex items-center gap-3" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '10px 12px' }}>
+                                            <span className="material-symbols-outlined text-amber-400 text-[18px]">science</span>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <span className="text-[11px] font-bold text-green-200/70 uppercase tracking-wider">pH Level</span>
+                                                    <span className="text-sm font-black text-white">6.8</span>
+                                                </div>
+                                                <div className="w-full h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                                                    <div className="h-1.5 rounded-full bg-amber-400" style={{ width: '68%' }}></div>
+                                                </div>
+                                            </div>
+                                            <span className="text-[10px] font-bold text-amber-400 shrink-0">Ideal</span>
                                         </div>
                                     </div>
 
-                                    <button 
+                                    {/* CTA — full width, bottom center */}
+                                    <button
                                         onClick={() => setShowSoilReport(true)}
-                                        className="w-max px-4 py-2 bg-white text-primary-900 text-sm font-bold rounded-lg hover:bg-slate-100 transition-colors"
+                                        className="mt-5 w-full py-2.5 font-bold text-sm rounded-xl transition-all hover:opacity-90 active:scale-95 text-center"
+                                        style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff' }}
                                     >
-                                        Open Detailed Report
+                                        Open Detailed Report →
                                     </button>
                                 </div>
                             </div>
 
                         </div>
                     </div>
+
 
                     {/* Integrated My Crops Section */}
                     <div className="max-w-7xl mx-auto space-y-8 mt-12 pt-12 border-t border-slate-200">

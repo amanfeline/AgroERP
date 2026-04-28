@@ -27,8 +27,6 @@ export const useWeatherPrediction = () => {
         try {
             const result = await predictWeather(inputData);
             setPrediction(result);
-            localStorage.setItem('lastWeatherPrediction', JSON.stringify(result));
-            localStorage.setItem('lastWeatherInput', JSON.stringify(inputData));
 
             // Also fetch the seasonal extension
             const seasonalResult = await getSeasonalForecast(inputData);
@@ -41,15 +39,9 @@ export const useWeatherPrediction = () => {
         }
     }, []);
 
-    // Load from cache on mount
+    // Fetch on mount
     useEffect(() => {
-        const cached = localStorage.getItem('lastWeatherPrediction');
-        if (cached) {
-            setPrediction(JSON.parse(cached));
-        } else {
-            // Auto fetch default if none exists
-            predict(defaultInput);
-        }
+        predict(defaultInput);
     }, [predict]);
 
     return {

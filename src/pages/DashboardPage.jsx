@@ -544,7 +544,7 @@ const DashboardPage = () => {
                     {/* Bottom bar */}
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-6" style={{ borderTop: '1px solid rgba(74,222,128,0.1)' }}>
                         <p className="text-xs text-green-100/30 font-medium">
-                            © {new Date().getFullYear()} AgriERP. Built with ❤️ for Indian Farmers.
+                            {'\u00A9'} {new Date().getFullYear()} AgriERP. Built with {'❤'} for Indian Farmers.
                         </p>
                         <div className="flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>

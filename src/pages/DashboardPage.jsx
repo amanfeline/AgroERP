@@ -426,7 +426,7 @@ const DashboardPage = () => {
                             </div>
                         </div>
                     </div>
-                )}
+                )}\n            </div>
             {/* ─── FOOTER ─── */}
             <footer style={{ background: 'linear-gradient(160deg, #0a2416 0%, #0d3320 50%, #0a2416 100%)' }} className="relative overflow-hidden mt-16">
                 {/* Subtle glow orbs */}

@@ -18,9 +18,9 @@ const Sidebar = () => {
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { name: 'Explore', path: '/explore', icon: Compass },
         { name: 'Market Prices', path: '/market-prices', icon: BarChart3 },
+        { name: 'Weather AI', path: '/weather', icon: CloudLightning },
         { name: 'Profile', path: '/profile', icon: User },
         { name: 'Help', path: '/help', icon: HelpCircle },
-        { name: 'Weather AI', path: '/weather', icon: CloudLightning },
     ];
 
     // Add Admin Panel if user is admin

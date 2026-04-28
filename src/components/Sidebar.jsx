@@ -6,10 +6,14 @@ import {
     BarChart3,
     User,
     HelpCircle,
-    CloudLightning
+    CloudLightning,
+    Shield
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Sidebar = () => {
+    const { user } = useAuth();
+    
     const navItems = [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { name: 'Explore', path: '/explore', icon: Compass },
@@ -18,6 +22,11 @@ const Sidebar = () => {
         { name: 'Help', path: '/help', icon: HelpCircle },
         { name: 'Weather AI', path: '/weather', icon: CloudLightning },
     ];
+
+    // Add Admin Panel if user is admin
+    if (user?.role === 'admin') {
+        navItems.push({ name: 'Admin Panel', path: '/admin', icon: Shield });
+    }
 
     return (
         <aside className="w-[220px] fixed top-0 left-0 h-screen bg-white border-r border-slate-200 flex flex-col z-20">
@@ -46,15 +55,6 @@ const Sidebar = () => {
                 ))}
             </nav>
 
-            <div className="p-4 mt-auto">
-                <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl text-center">
-                    <p className="text-sm font-bold text-slate-900">Premium Plan</p>
-                    <p className="text-xs text-slate-500 mb-4 mt-1">Get advanced soil analytics</p>
-                    <button className="w-full py-2 bg-primary-500 hover:bg-primary-600 text-white text-xs font-bold rounded-lg transition-colors shadow-sm">
-                        UPGRADE
-                    </button>
-                </div>
-            </div>
         </aside>
     );
 };

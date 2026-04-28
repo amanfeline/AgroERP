@@ -10,3 +10,10 @@ backend/data/
 
 .DS_Store
 node_modules
+auth-server/.env
+.env.local
+.env.development
+.env.test
+.env.production
+venv/
+*.pyc

@@ -3,8 +3,13 @@ import Topbar from '../components/Topbar';
 import StatCard from '../components/StatCard';
 import MarketTable from '../components/MarketTable';
 import { TrendingUp, Globe2, Activity, Wheat } from 'lucide-react';
+import { useLivePrices } from '../services/marketApi';
 
 const MarketPricesPage = () => {
+    const { data: liveData } = useLivePrices();
+    
+    const wheatData = liveData?.find(d => d.commodity.includes('Wheat')) || { price: 214.50, change: 2.4 };
+    const riceData = liveData?.find(d => d.commodity.includes('Rice')) || { price: 410.20, change: -0.8 };
     return (
         <div className="flex h-screen bg-[#edf5f0] overflow-hidden">
             <Sidebar />
@@ -18,17 +23,17 @@ const MarketPricesPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <StatCard
                                 title="Wheat Avg. Price"
-                                value="$214.50"
-                                change="+2.4%"
-                                changeType="positive"
+                                value={`$${wheatData.price.toFixed(2)}`}
+                                change={`${wheatData.change > 0 ? '+' : ''}${wheatData.change}%`}
+                                changeType={wheatData.change >= 0 ? "positive" : "negative"}
                                 icon={Wheat}
                                 bgImage="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?q=80&w=300&auto=format&fit=crop"
                             />
                             <StatCard
                                 title="Rice (Basmati)"
-                                value="$410.20"
-                                change="-0.8%"
-                                changeType="negative"
+                                value={`$${riceData.price.toFixed(2)}`}
+                                change={`${riceData.change > 0 ? '+' : ''}${riceData.change}%`}
+                                changeType={riceData.change >= 0 ? "positive" : "negative"}
                                 icon={TrendingUp}
                                 bgImage="https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=300&auto=format&fit=crop"
                             />

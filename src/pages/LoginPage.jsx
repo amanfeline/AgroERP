@@ -1,12 +1,51 @@
-import { useNavigate } from 'react-router-dom';
-import { Leaf } from 'lucide-react'; // Simulating tractor/agriculture icon with Leaf for simplicity since we use lucide
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import GoogleAuthModal from '../components/GoogleAuthModal';
 
 const LoginPage = () => {
     const navigate = useNavigate();
+    const { login, googleLogin } = useAuth();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [showGoogleModal, setShowGoogleModal] = useState(false);
+    
+    const [formData, setFormData] = useState({ email: '', password: '' });
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        navigate('/dashboard');
+        setLoading(true);
+        setError('');
+        
+        try {
+            const result = await login(formData.email, formData.password);
+            if (result.success) {
+                navigate('/dashboard');
+            } else {
+                setError(result.message || 'Login failed.');
+            }
+        } catch (err) {
+            setError(err.message || 'Failed to login.');
+        }
+        setLoading(false);
+    };
+
+    const handleGoogleSuccess = async (name, email) => {
+        setLoading(true);
+        setShowGoogleModal(false);
+        setError('');
+        
+        try {
+            const result = await googleLogin(name, email);
+            if (result.success) {
+                navigate('/dashboard');
+            } else {
+                setError(result.message || 'Google Login failed.');
+            }
+        } catch (err) {
+            setError(err.message || 'Failed to login with Google.');
+        }
+        setLoading(false);
     };
 
     return (
@@ -28,6 +67,14 @@ const LoginPage = () => {
                         <span className="text-2xl font-black text-white tracking-tight">Agro ERP</span>
                     </div>
 
+                    <div className="mt-auto">
+                        <h1 className="text-5xl font-black text-white mb-6 leading-tight">
+                            Welcome back to <br/><span className="text-primary-400">Agro ERP</span>
+                        </h1>
+                        <p className="text-xl text-slate-300 max-w-lg">
+                            Empowering farmers with data, insights & planning.
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -45,12 +92,19 @@ const LoginPage = () => {
                     </div>
 
                     <header className="mb-10 text-center lg:text-left">
-                        <h2 className="text-4xl font-black text-slate-900 tracking-tight mb-3">Welcome back</h2>
-                        <p className="text-slate-500 text-lg font-medium">Empowering farmers with data, insights & planning</p>
+                        <h2 className="text-4xl font-black text-slate-900 tracking-tight mb-3">Sign In</h2>
+                        <p className="text-slate-500 text-lg font-medium">Log in to your account</p>
                     </header>
 
                     <div className="space-y-6">
-                        <button className="w-full h-14 bg-white border border-slate-200 hover:bg-slate-50 transition-colors rounded-xl flex items-center justify-center gap-3 shadow-sm group">
+                        
+                        {error && (
+                            <div className="p-3 bg-red-100 text-red-700 text-sm rounded-lg font-bold">
+                                {error}
+                            </div>
+                        )}
+
+                        <button type="button" onClick={() => setShowGoogleModal(true)} disabled={loading} className="w-full h-14 bg-white border border-slate-200 hover:bg-slate-50 transition-colors rounded-xl flex items-center justify-center gap-3 shadow-sm group">
                             <svg className="w-6 h-6" viewBox="0 0 24 24">
                                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
                                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
@@ -62,37 +116,42 @@ const LoginPage = () => {
 
                         <div className="flex items-center gap-4 py-2">
                             <div className="flex-1 h-px bg-slate-200"></div>
-                            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Or continue with phone</span>
+                            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Or continue with Email</span>
                             <div className="flex-1 h-px bg-slate-200"></div>
                         </div>
 
-                        <form onSubmit={handleLogin} className="space-y-5">
-                            <div className="flex gap-3">
-                                <div className="w-1/3">
-                                    <select className="w-full h-14 px-4 bg-white border border-slate-200 rounded-xl text-slate-900 font-bold focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none appearance-none cursor-pointer">
-                                        <option value="+91">+91 (IN)</option>
-                                        <option value="+1">+1 (US)</option>
-                                        <option value="+44">+44 (UK)</option>
-                                    </select>
-                                </div>
-                                <div className="flex-1">
-                                    <input
-                                        type="tel"
-                                        placeholder="98765 43210"
-                                        className="w-full h-14 px-4 bg-white border border-slate-200 rounded-xl text-slate-900 font-bold placeholder:text-slate-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
-                                    />
-                                </div>
+                        <form onSubmit={handleLogin} className="space-y-4">
+                            <div>
+                                <input
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={e => setFormData({...formData, email: e.target.value})}
+                                    placeholder="Email Address"
+                                    required
+                                    className="w-full h-14 px-4 bg-white border border-slate-200 rounded-xl text-slate-900 font-bold placeholder:text-slate-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                                />
+                            </div>
+                            <div>
+                                <input
+                                    type="password"
+                                    value={formData.password}
+                                    onChange={e => setFormData({...formData, password: e.target.value})}
+                                    placeholder="Password"
+                                    required
+                                    className="w-full h-14 px-4 bg-white border border-slate-200 rounded-xl text-slate-900 font-bold placeholder:text-slate-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                                />
                             </div>
                             <button
                                 type="submit"
-                                className="w-full h-14 bg-primary-500 hover:bg-primary-600 text-white font-bold text-lg rounded-full flex justify-center items-center gap-2 transition-all shadow-md shadow-primary-500/20"
+                                disabled={loading}
+                                className="w-full h-14 bg-primary-500 hover:bg-primary-600 disabled:bg-primary-300 text-white font-bold text-lg rounded-full flex justify-center items-center gap-2 transition-all shadow-md shadow-primary-500/20 mt-2"
                             >
-                                Send OTP <span className="text-xl">→</span>
+                                {loading ? 'Logging in...' : 'Sign In'} <span className="text-xl">→</span>
                             </button>
                         </form>
 
-                        <p className="text-center text-xs text-slate-400 font-medium">
-                            By continuing, you agree to our <a href="#" className="text-primary-600 hover:underline">Terms of Service</a> and <a href="#" className="text-primary-600 hover:underline">Privacy Policy</a>
+                        <p className="text-center text-sm text-slate-600 font-medium mt-4">
+                            Don't have an account? <Link to="/register" className="text-primary-600 hover:underline font-bold">Sign up here</Link>
                         </p>
 
                         <div className="mt-8 p-4 bg-white border border-slate-200 rounded-2xl flex items-center justify-between shadow-sm">
@@ -110,6 +169,11 @@ const LoginPage = () => {
                     </div>
                 </div>
             </div>
+            <GoogleAuthModal 
+                isOpen={showGoogleModal} 
+                onClose={() => setShowGoogleModal(false)} 
+                onSuccess={handleGoogleSuccess} 
+            />
         </div>
     );
 };

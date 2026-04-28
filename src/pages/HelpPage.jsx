@@ -43,8 +43,8 @@ const HelpPage = () => {
                                         <Phone className="w-7 h-7" />
                                     </div>
                                     <h3 className="font-bold text-lg text-slate-900 mb-2">Call Us</h3>
-                                    <p className="text-sm text-slate-500 font-medium">Available 24/7 for premium members</p>
-                                    <p className="mt-5 font-bold text-primary-600">1-800-AGRO-ERP</p>
+                                    <p className="text-sm text-slate-500 font-medium">Available 24/7</p>
+                                    <p className="mt-5 font-bold text-primary-600">9315523023</p>
                                 </div>
                             </div>
 
@@ -59,11 +59,11 @@ const HelpPage = () => {
                                     </div>
                                     <h3 className="font-bold text-lg text-slate-900 mb-2">Email Support</h3>
                                     <p className="text-sm text-slate-500 font-medium">Get a response within 24 hours</p>
-                                    <p className="mt-5 font-bold text-primary-600">support@agroerp.com</p>
+                                    <p className="mt-5 font-bold text-primary-600">amanyadav07093124@gmail.com</p>
                                 </div>
                             </div>
 
-                            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center cursor-pointer group relative overflow-hidden">
+                            <a href="https://github.com/amancatto" target="_blank" rel="noopener noreferrer" className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center cursor-pointer group relative overflow-hidden block">
                                 <div
                                     className="absolute inset-0 bg-cover bg-center opacity-5 group-hover:opacity-15 transition-opacity duration-300 mix-blend-multiply"
                                     style={{ backgroundImage: "url('https://images.unsplash.com/photo-1456324504439-367cee3b3c32?q=80&w=800&auto=format&fit=crop')" }}
@@ -76,7 +76,7 @@ const HelpPage = () => {
                                     <p className="text-sm text-slate-500 font-medium">Detailed guides and tutorials</p>
                                     <p className="mt-5 font-bold text-primary-600 group-hover:translate-x-1 transition-transform inline-block">Browse Docs →</p>
                                 </div>
-                            </div>
+                            </a>
                         </div>
                     </div>
                 </main>

@@ -1,13 +1,30 @@
-import { useState } from 'react';
-import { ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight, Download } from 'lucide-react';
-import { marketTableData } from '../data/mockData';
+import { useState, useEffect } from 'react';
+import { ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight, Download, RefreshCw } from 'lucide-react';
+import { useLivePrices } from '../services/marketApi';
 
 const MarketTable = () => {
     const [activeTab, setActiveTab] = useState('All Crops');
     const tabs = ['All Crops', 'Cereals ▾', 'Fibers ▾', 'Oilseeds ▾'];
+    const [selectedCountry, setSelectedCountry] = useState('India');
 
     // Very basic client side pagination mockup
     const [currentPage, setCurrentPage] = useState(1);
+    
+    const { data: liveData, isLoading, lastUpdated, refresh } = useLivePrices(selectedCountry);
+
+    // Time ago calculator
+    const [timeAgo, setTimeAgo] = useState('just now');
+    useEffect(() => {
+        const updateTimeAgo = () => {
+            const seconds = Math.floor((new Date() - lastUpdated) / 1000);
+            if (seconds < 5) setTimeAgo('just now');
+            else if (seconds < 60) setTimeAgo(`${seconds}s ago`);
+            else setTimeAgo(`${Math.floor(seconds/60)}m ago`);
+        };
+        updateTimeAgo();
+        const interval = setInterval(updateTimeAgo, 1000);
+        return () => clearInterval(interval);
+    }, [lastUpdated]);
 
     return (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
@@ -29,12 +46,27 @@ const MarketTable = () => {
                 </div>
 
                 <div className="flex gap-3">
-                    <select className="bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500/20">
-                        <option>North America</option>
-                        <option>South Asia</option>
-                        <option>Europe</option>
+                    <select 
+                        value={selectedCountry}
+                        onChange={(e) => setSelectedCountry(e.target.value)}
+                        className="bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500/20"
+                    >
+                        <option value="India">India</option>
+                        <option value="North America (USA)">North America (USA)</option>
+                        <option value="South Asia">South Asia</option>
+                        <option value="Europe">Europe</option>
+                        <option value="China">China</option>
+                        <option value="Brazil">Brazil</option>
+                        <option value="Australia">Australia</option>
+                        <option value="Southeast Asia">Southeast Asia</option>
+                        <option value="Middle East">Middle East</option>
+                        <option value="Africa">Africa</option>
+                        <option value="Russia">Russia</option>
+                        <option value="Canada">Canada</option>
                     </select>
-                    <button className="flex items-center gap-2 bg-primary-50 text-primary-600 border border-primary-100 px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary-100 transition-colors">
+                    <span className="text-xs font-bold text-slate-500 self-center">Updated {timeAgo}</span>
+                    <button onClick={refresh} disabled={isLoading} className="flex items-center gap-2 bg-primary-50 text-primary-600 border border-primary-100 px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary-100 transition-colors disabled:opacity-50">
+                        <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                         Update Live
                     </button>
                     <button className="flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">
@@ -58,32 +90,42 @@ const MarketTable = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        {marketTableData.map((row) => (
-                            <tr key={row.id} className="hover:bg-slate-50/80 transition-colors group">
-                                <td className="p-4 pl-6 font-bold text-slate-900 group-hover:text-primary-600 transition-colors">{row.commodity}</td>
-                                <td className="p-4 text-sm text-slate-500 font-medium">{row.market}</td>
-                                <td className="p-4 font-bold text-slate-900">${row.price.toFixed(2)}</td>
-                                <td className={`p-4 font-bold text-sm flex items-center gap-1 ${row.change > 0 ? 'text-green-500' : row.change < 0 ? 'text-red-500' : 'text-slate-500'}`}>
-                                    {row.change > 0 ? <ArrowUpRight className="w-4 h-4" /> : row.change < 0 ? <ArrowDownRight className="w-4 h-4" /> : null}
-                                    {row.change > 0 ? '+' : ''}{row.change}%
-                                </td>
-                                <td className="p-4 text-sm font-medium text-slate-600 text-right">{row.volume}</td>
-                                <td className="p-4 text-center">
-                                    <span className={`inline-block px-2.5 py-1 text-[10px] uppercase font-bold rounded border ${row.gradeColor === 'green' ? 'bg-green-50 text-green-700 border-green-200' :
-                                            'bg-slate-100 text-slate-600 border-slate-200'
-                                        }`}>
-                                        {row.grade}
-                                    </span>
-                                </td>
-                                <td className="p-4 pr-6 text-right">
-                                    <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${row.status === 'Active' ? 'text-slate-700' : 'text-amber-600'
-                                        }`}>
-                                        {row.status}
-                                        <span className={`w-2 h-2 rounded-full ${row.status === 'Active' ? 'bg-primary-500' : 'bg-amber-500'}`}></span>
-                                    </span>
-                                </td>
-                            </tr>
-                        ))}
+                        {isLoading && liveData.length === 0 ? (
+                            [...Array(6)].map((_, i) => (
+                                <tr key={`skeleton-${i}`}>
+                                    <td colSpan="7" className="p-4">
+                                        <div className="h-10 bg-slate-100 animate-pulse rounded-lg w-full"></div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            liveData.map((row) => (
+                                <tr key={row.id} className="hover:bg-slate-50/80 transition-colors group">
+                                    <td className="p-4 pl-6 font-bold text-slate-900 group-hover:text-primary-600 transition-colors">{row.commodity}</td>
+                                    <td className="p-4 text-sm text-slate-500 font-medium">{row.market}</td>
+                                    <td className="p-4 font-bold text-slate-900">${row.price.toFixed(2)}</td>
+                                    <td className={`p-4 font-bold text-sm flex items-center gap-1 ${row.change > 0 ? 'text-green-500' : row.change < 0 ? 'text-red-500' : 'text-slate-500'}`}>
+                                        {row.change > 0 ? <ArrowUpRight className="w-4 h-4" /> : row.change < 0 ? <ArrowDownRight className="w-4 h-4" /> : null}
+                                        {row.change > 0 ? '+' : ''}{row.change}%
+                                    </td>
+                                    <td className="p-4 text-sm font-medium text-slate-600 text-right">{row.volume}</td>
+                                    <td className="p-4 text-center">
+                                        <span className={`inline-block px-2.5 py-1 text-[10px] uppercase font-bold rounded border ${row.gradeColor === 'green' ? 'bg-green-50 text-green-700 border-green-200' :
+                                                'bg-slate-100 text-slate-600 border-slate-200'
+                                            }`}>
+                                            {row.grade}
+                                        </span>
+                                    </td>
+                                    <td className="p-4 pr-6 text-right">
+                                        <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${row.status === 'Active' ? 'text-slate-700' : 'text-amber-600'
+                                            }`}>
+                                            {row.status}
+                                            <span className={`w-2 h-2 rounded-full ${row.status === 'Active' ? 'bg-primary-500' : 'bg-amber-500'}`}></span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>

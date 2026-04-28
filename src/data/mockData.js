@@ -75,25 +75,25 @@ export const exploreCrops = [
         id: 3,
         name: 'Bt Cotton',
         description: 'Pest resistant with long fiber length',
-        image: 'https://images.unsplash.com/photo-1647427022830-ec667c2957b9?q=80&w=300&auto=format&fit=crop'
+        image: 'https://images.unsplash.com/photo-1568714894491-7b4fd02f0c1a?q=80&w=300&auto=format&fit=crop'
     },
     {
         id: 4,
         name: 'Black Soy',
         description: 'Nitrogen fixing cover crop option',
-        image: 'https://images.unsplash.com/photo-1521575791263-dcae8a881cb5?q=80&w=300&auto=format&fit=crop'
+        image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=300&auto=format&fit=crop'
     },
     {
         id: 5,
         name: 'Sugarcane',
         description: 'High profitability with steady water supply',
-        image: 'https://images.unsplash.com/photo-1590391038501-c67d3071bb25?q=80&w=300&auto=format&fit=crop'
+        image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=300&auto=format&fit=crop'
     },
     {
         id: 6,
         name: 'Groundnut',
         description: 'Excellent for sandy loam soils',
-        image: 'https://images.unsplash.com/photo-1629828557929-e8dafb66cb1e?q=80&w=300&auto=format&fit=crop'
+        image: 'https://images.unsplash.com/photo-1567529684892-09290a1b2d05?q=80&w=300&auto=format&fit=crop'
     },
     {
         id: 7,
@@ -105,7 +105,7 @@ export const exploreCrops = [
         id: 8,
         name: 'Pigeon Pea (Arhar)',
         description: 'Deep-rooted, drought-tolerant pulse',
-        image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=300&auto=format&fit=crop'
+        image: 'https://images.unsplash.com/photo-1574226516831-e1dff420e562?q=80&w=300&auto=format&fit=crop'
     },
     {
         id: 9,

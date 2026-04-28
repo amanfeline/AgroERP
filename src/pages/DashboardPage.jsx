@@ -130,12 +130,32 @@ const DashboardPage = () => {
                             <div className="bg-primary-900 rounded-2xl p-6 shadow-md relative overflow-hidden flex-1 min-h-[200px]">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary-800 rounded-bl-full opacity-50"></div>
                                 <div className="relative z-10 flex flex-col h-full">
-                                    <span className="material-symbols-outlined text-primary-400 text-3xl mb-4">psychiatry</span>
-                                    <h3 className="text-xl font-bold text-white mb-2">Automated Soil Report Ready</h3>
-                                    <p className="text-sm text-primary-200 font-medium mb-6">Generated 10 minutes ago based on satellite imagery.</p>
+                                    <span className="material-symbols-outlined text-primary-400 text-3xl mb-2">psychiatry</span>
+                                    <h3 className="text-xl font-bold text-white mb-1">Automated Soil Report Ready</h3>
+                                    <p className="text-xs text-primary-300 font-medium mb-4">Generated 10 minutes ago · satellite imagery</p>
+
+                                    {/* 3 Key Metrics */}
+                                    <div className="grid grid-cols-3 gap-2 mb-4">
+                                        <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center border border-white/10">
+                                            <p className="text-xs text-primary-300 font-bold uppercase tracking-wider mb-0.5">Health</p>
+                                            <p className="text-xl font-black text-white">88<span className="text-xs">/100</span></p>
+                                            <p className="text-[10px] text-green-400 font-bold">↑ Good</p>
+                                        </div>
+                                        <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center border border-white/10">
+                                            <p className="text-xs text-primary-300 font-bold uppercase tracking-wider mb-0.5">Moisture</p>
+                                            <p className="text-xl font-black text-white">64<span className="text-xs">%</span></p>
+                                            <p className="text-[10px] text-blue-400 font-bold">Optimal</p>
+                                        </div>
+                                        <div className="bg-white/10 backdrop-blur rounded-xl p-3 text-center border border-white/10">
+                                            <p className="text-xs text-primary-300 font-bold uppercase tracking-wider mb-0.5">pH</p>
+                                            <p className="text-xl font-black text-white">6.8</p>
+                                            <p className="text-[10px] text-green-400 font-bold">Ideal</p>
+                                        </div>
+                                    </div>
+
                                     <button 
                                         onClick={() => setShowSoilReport(true)}
-                                        className="mt-auto w-max px-4 py-2 bg-white text-primary-900 text-sm font-bold rounded-lg hover:bg-slate-100 transition-colors"
+                                        className="w-max px-4 py-2 bg-white text-primary-900 text-sm font-bold rounded-lg hover:bg-slate-100 transition-colors"
                                     >
                                         Open Detailed Report
                                     </button>
@@ -239,14 +259,6 @@ const DashboardPage = () => {
                                     ))
                                 )}
 
-                                {/* Add New Crop Card */}
-                                <div className={`border-2 border-dashed border-slate-300 rounded-2xl flex flex-col justify-center items-center text-slate-400 hover:text-primary-600 hover:border-primary-300 hover:bg-primary-50/50 transition-colors cursor-pointer group ${layout === 'grid' ? 'h-full min-h-[400px]' : 'py-12'}`}>
-                                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 mb-4 group-hover:scale-110 transition-transform">
-                                        <Plus className="w-8 h-8 text-slate-400 group-hover:text-primary-600" />
-                                    </div>
-                                    <h4 className="text-lg font-bold text-slate-600 group-hover:text-primary-600 mb-1">Add New Crop Plot</h4>
-                                    <p className="text-sm font-medium">Link a new field via GPS coordinates</p>
-                                </div>
                             </div>
                         </section>
 

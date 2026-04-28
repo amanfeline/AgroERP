@@ -553,6 +553,7 @@ const DashboardPage = () => {
                     </div>
                 </div>
             </footer>
+            </div>
         </div>
     );
 };

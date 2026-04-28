@@ -61,63 +61,104 @@ export const exploreCrops = [
     {
         id: 1,
         name: 'Basmati Rice',
-        description: 'High yield potential for upcoming monsoon',
+        season: 'Kharif',
+        soilType: 'Clay Loam',
+        profitIndex: 95,
+        waterNeed: 'High',
         badge: 'TOP PRIORITY',
-        image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=300&auto=format&fit=crop'
+        description: 'High yield potential for upcoming monsoon season with premium market demand.',
+        image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=600&auto=format&fit=crop'
     },
     {
         id: 2,
         name: 'Maize (Hybrid)',
-        description: 'Drought resistant variant for dry zones',
-        image: 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?q=80&w=300&auto=format&fit=crop'
+        season: 'Kharif',
+        soilType: 'Sandy Loam',
+        profitIndex: 88,
+        waterNeed: 'Medium',
+        badge: 'HIGH DEMAND',
+        description: 'Drought resistant hybrid variety ideal for dry zones and intercropping.',
+        image: 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?q=80&w=600&auto=format&fit=crop'
     },
     {
         id: 3,
         name: 'Bt Cotton',
-        description: 'Pest resistant with long fiber length',
-        image: 'https://images.unsplash.com/photo-1568714894491-7b4fd02f0c1a?q=80&w=300&auto=format&fit=crop'
+        season: 'Kharif',
+        soilType: 'Black Soil',
+        profitIndex: 85,
+        waterNeed: 'Medium',
+        description: 'Pest resistant biotech variety with longer staple length and high export value.',
+        image: 'https://images.unsplash.com/photo-1590756254933-2873d72a83b6?q=80&w=600&auto=format&fit=crop'
     },
     {
         id: 4,
-        name: 'Black Soy',
-        description: 'Nitrogen fixing cover crop option',
-        image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=300&auto=format&fit=crop'
+        name: 'Soybean',
+        season: 'Kharif',
+        soilType: 'Alluvial',
+        profitIndex: 82,
+        waterNeed: 'Medium',
+        description: 'Nitrogen-fixing legume with strong domestic and export demand for oil and meal.',
+        image: 'https://images.unsplash.com/photo-1628001614741-f7a63aa36e1c?q=80&w=600&auto=format&fit=crop'
     },
     {
         id: 5,
         name: 'Sugarcane',
-        description: 'High profitability with steady water supply',
-        image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=300&auto=format&fit=crop'
+        season: 'Annual',
+        soilType: 'Loam',
+        profitIndex: 80,
+        waterNeed: 'High',
+        description: 'High cash-value perennial crop with guaranteed procurement from sugar mills.',
+        image: 'https://images.unsplash.com/photo-1620217174924-22ab68d03a1a?q=80&w=600&auto=format&fit=crop'
     },
     {
         id: 6,
         name: 'Groundnut',
-        description: 'Excellent for sandy loam soils',
-        image: 'https://images.unsplash.com/photo-1567529684892-09290a1b2d05?q=80&w=300&auto=format&fit=crop'
+        season: 'Kharif',
+        soilType: 'Sandy Loam',
+        profitIndex: 78,
+        waterNeed: 'Low',
+        description: 'Low-water oilseed crop excellent for sandy loam soils with good returns.',
+        image: 'https://images.unsplash.com/photo-1567529684892-09290a1b2d05?q=80&w=600&auto=format&fit=crop'
     },
     {
         id: 7,
         name: 'Turmeric',
-        description: 'High value cash crop with medicinal properties',
-        image: 'https://images.unsplash.com/photo-1615484477201-cb864b2811cc?q=80&w=300&auto=format&fit=crop'
+        season: 'Kharif',
+        soilType: 'Red Loam',
+        profitIndex: 76,
+        waterNeed: 'Medium',
+        description: 'Premium spice crop with high medicinal value and strong export demand.',
+        image: 'https://images.unsplash.com/photo-1615484477201-cb864b2811cc?q=80&w=600&auto=format&fit=crop'
     },
     {
         id: 8,
         name: 'Pigeon Pea (Arhar)',
-        description: 'Deep-rooted, drought-tolerant pulse',
-        image: 'https://images.unsplash.com/photo-1574226516831-e1dff420e562?q=80&w=300&auto=format&fit=crop'
+        season: 'Kharif',
+        soilType: 'Black Soil',
+        profitIndex: 73,
+        waterNeed: 'Low',
+        description: 'Deep-rooted drought-tolerant pulse that improves soil nitrogen naturally.',
+        image: 'https://images.unsplash.com/photo-1585952537782-a2ac9f9a9e8a?q=80&w=600&auto=format&fit=crop'
     },
     {
         id: 9,
         name: 'Pearl Millet (Bajra)',
-        description: 'Resilient crop for semi-arid regions',
-        image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?q=80&w=300&auto=format&fit=crop'
+        season: 'Kharif',
+        soilType: 'Sandy',
+        profitIndex: 70,
+        waterNeed: 'Low',
+        description: 'Highly resilient to heat and drought, suited for semi-arid rain-fed farming.',
+        image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?q=80&w=600&auto=format&fit=crop'
     },
     {
         id: 10,
         name: 'Sorghum (Jowar)',
-        description: 'Dual-purpose grain and fodder crop',
-        image: 'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?q=80&w=300&auto=format&fit=crop'
+        season: 'Kharif / Rabi',
+        soilType: 'Loam',
+        profitIndex: 67,
+        waterNeed: 'Low',
+        description: 'Dual-purpose staple grain and livestock fodder with minimal water requirement.',
+        image: 'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?q=80&w=600&auto=format&fit=crop'
     }
 ];
 

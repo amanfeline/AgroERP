@@ -7,6 +7,7 @@ import { useWeatherPrediction } from '../hooks/useWeatherPrediction';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLivePrices } from '../services/marketApi';
+import { useNavigate } from 'react-router-dom';
 
 const ExplorePage = () => {
     const { prediction } = useWeatherPrediction();
@@ -15,6 +16,7 @@ const ExplorePage = () => {
     const [filterAiMatch, setFilterAiMatch] = useState(false);
     const [showAllCrops, setShowAllCrops] = useState(false);
     const [engineData, setEngineData] = useState({ profitableCrops: [], optimizedRecommendations: [] });
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchRecommendations = async () => {
@@ -116,52 +118,103 @@ const ExplorePage = () => {
 
                                 {/* Best Crops to Plant */}
                                 <section>
-                                    <div className="flex justify-between items-center mb-6">
-                                        <div className="flex items-center gap-4">
+                                    <div className="flex justify-between items-center mb-5">
+                                        <div>
                                             <h3 className="text-xl font-black text-slate-900">Best Crops to Plant</h3>
-
-                                            {/* AI Filter Toggle */}
-                                            {prediction && (
-                                                <button
-                                                    onClick={() => setFilterAiMatch(!filterAiMatch)}
-                                                    className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${filterAiMatch
-                                                            ? 'bg-primary-50 text-primary-700 border-primary-200'
-                                                            : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
-                                                        }`}
-                                                >
-                                                    <span className="material-symbols-outlined text-[14px]">psychology</span>
-                                                    Filter AI Suitability {'>'} 70
-                                                </button>
-                                            )}
+                                            <p className="text-xs text-slate-500 font-medium mt-0.5">Ranked by profit index · Kharif 2025</p>
                                         </div>
-                                        <button 
+                                        <button
                                             onClick={() => setShowAllCrops(true)}
-                                            className="text-sm font-bold text-primary-600 hover:underline"
+                                            className="flex items-center gap-1.5 text-sm font-bold text-primary-600 hover:text-primary-700 transition-colors"
                                         >
                                             View All
+                                            <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                                         </button>
                                     </div>
-                                    <div className="flex gap-6 overflow-x-auto pb-4 snap-x hide-scrollbar">
-                                        {displayedCrops.map((crop, index) => (
-                                            <div key={crop.id} className="snap-start">
-                                                <ExploreCropCard data={crop} aiMatch={isAiMatch && index % 2 === 0} />
+
+                                    {/* Ranked list — top 5 shown inline */}
+                                    <div className="space-y-3">
+                                        {displayedCrops.slice(0, 5).map((crop, index) => (
+                                            <div key={crop.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-4 p-3 cursor-pointer group">
+                                                {/* Rank */}
+                                                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0" style={{ background: index === 0 ? '#f59e0b' : index === 1 ? '#94a3b8' : index === 2 ? '#cd7c3f' : '#e2e8f0', color: index < 3 ? '#fff' : '#64748b' }}>
+                                                    {index + 1}
+                                                </div>
+                                                {/* Image */}
+                                                <div className="w-14 h-14 rounded-xl bg-slate-100 shrink-0 bg-cover bg-center" style={{ backgroundImage: `url('${crop.image}')` }}></div>
+                                                {/* Info */}
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 mb-0.5">
+                                                        <p className="font-black text-slate-900 text-sm truncate">{crop.name}</p>
+                                                        {crop.badge && <span className="shrink-0 px-1.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 text-[9px] font-black uppercase tracking-wider rounded">{crop.badge}</span>}
+                                                    </div>
+                                                    <p className="text-xs text-slate-500 truncate">{crop.description}</p>
+                                                    <div className="flex items-center gap-3 mt-1.5">
+                                                        <span className="text-[10px] font-bold text-slate-400">{crop.season}</span>
+                                                        <span className="text-[10px] font-bold text-slate-400">💧 {crop.waterNeed}</span>
+                                                        <span className="text-[10px] font-bold text-slate-400">{crop.soilType}</span>
+                                                    </div>
+                                                </div>
+                                                {/* Profit Index */}
+                                                <div className="text-right shrink-0">
+                                                    <p className="text-lg font-black" style={{ color: crop.profitIndex >= 85 ? '#16a34a' : crop.profitIndex >= 75 ? '#ca8a04' : '#64748b' }}>{crop.profitIndex}</p>
+                                                    <p className="text-[10px] text-slate-400 font-bold">PROFIT IDX</p>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
 
-                                    {/* Modal for View All Crops */}
+                                    {/* View All Modal */}
                                     {showAllCrops && (
                                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                                            <div className="bg-white w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-                                                <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-                                                    <h2 className="text-2xl font-black text-slate-900">All Recommended Crops</h2>
-                                                    <button onClick={() => setShowAllCrops(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
-                                                        <span className="material-symbols-outlined text-2xl">close</span>
+                                            <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                                                {/* Modal Header */}
+                                                <div className="p-6 border-b border-slate-100 flex justify-between items-start">
+                                                    <div>
+                                                        <h2 className="text-2xl font-black text-slate-900">All Recommended Crops</h2>
+                                                        <p className="text-sm text-slate-500 font-medium mt-1">Sorted by Profit Index · {displayedCrops.length} crops for Kharif 2025</p>
+                                                    </div>
+                                                    <button onClick={() => setShowAllCrops(false)} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors">
+                                                        <span className="material-symbols-outlined text-xl">close</span>
                                                     </button>
                                                 </div>
-                                                <div className="p-6 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                                {/* Table header */}
+                                                <div className="px-6 py-3 bg-slate-50 border-b border-slate-100 grid grid-cols-12 gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                                    <div className="col-span-1">#</div>
+                                                    <div className="col-span-5">Crop</div>
+                                                    <div className="col-span-2">Season</div>
+                                                    <div className="col-span-2">Water</div>
+                                                    <div className="col-span-2 text-right">Profit Idx</div>
+                                                </div>
+                                                {/* Rows */}
+                                                <div className="overflow-y-auto divide-y divide-slate-50">
                                                     {displayedCrops.map((crop, index) => (
-                                                        <ExploreCropCard key={crop.id} data={crop} aiMatch={isAiMatch && index % 2 === 0} />
+                                                        <div key={crop.id} className="px-6 py-4 grid grid-cols-12 gap-3 items-center hover:bg-slate-50 transition-colors">
+                                                            <div className="col-span-1">
+                                                                <div className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black" style={{ background: index === 0 ? '#f59e0b' : index === 1 ? '#94a3b8' : index === 2 ? '#cd7c3f' : '#f1f5f9', color: index < 3 ? '#fff' : '#64748b' }}>{index + 1}</div>
+                                                            </div>
+                                                            <div className="col-span-5 flex items-center gap-3">
+                                                                <div className="w-12 h-12 rounded-xl bg-slate-100 shrink-0 bg-cover bg-center" style={{ backgroundImage: `url('${crop.image}')` }}></div>
+                                                                <div className="min-w-0">
+                                                                    <p className="font-black text-slate-900 text-sm">{crop.name}</p>
+                                                                    <p className="text-xs text-slate-400 truncate">{crop.soilType}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="col-span-2 text-xs font-bold text-slate-600">{crop.season}</div>
+                                                            <div className="col-span-2">
+                                                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                                                                    crop.waterNeed === 'Low' ? 'bg-green-50 text-green-700' :
+                                                                    crop.waterNeed === 'Medium' ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'
+                                                                }`}>{crop.waterNeed}</span>
+                                                            </div>
+                                                            <div className="col-span-2 text-right">
+                                                                <span className="text-base font-black" style={{ color: crop.profitIndex >= 85 ? '#16a34a' : crop.profitIndex >= 75 ? '#ca8a04' : '#64748b' }}>{crop.profitIndex}</span>
+                                                                {/* Progress bar */}
+                                                                <div className="w-full h-1 rounded-full bg-slate-100 mt-1">
+                                                                    <div className="h-1 rounded-full" style={{ width: `${crop.profitIndex}%`, background: crop.profitIndex >= 85 ? '#16a34a' : crop.profitIndex >= 75 ? '#ca8a04' : '#94a3b8' }}></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     ))}
                                                 </div>
                                             </div>
@@ -239,8 +292,8 @@ const ExplorePage = () => {
                                             <div className="text-center text-sm text-slate-400 py-4">Market data unavailable</div>
                                         )}
                                     </div>
-                                    <button className="relative z-10 w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 rounded-xl transition-colors">
-                                        Full Market Report
+                                    <button onClick={() => navigate('/market')} className="relative z-10 w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 rounded-xl transition-colors">
+                                        Full Market Report →
                                     </button>
                                 </div>
 

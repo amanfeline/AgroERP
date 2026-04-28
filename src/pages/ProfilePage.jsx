@@ -14,10 +14,19 @@ const ProfilePage = () => {
         avatarUrl: ''
     });
     const [showSuccess, setShowSuccess] = useState(false);
-    const [showPicMenu, setShowPicMenu] = useState(false);
-    const [showPicViewer, setShowPicViewer] = useState(false);
-    const [isFetchingLocation, setIsFetchingLocation] = useState(false);
+    const [showPicPicker, setShowPicPicker] = useState(false);
     const fileInputRef = useRef(null);
+
+    const PRESET_AVATARS = [
+        'https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?q=80&w=200&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?q=80&w=200&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1546961342-ea5f62d5a8c4?q=80&w=200&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1611672585731-fa10603fb9e0?q=80&w=200&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?q=80&w=200&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1623582854588-d60de57fa33f?q=80&w=200&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1600180758890-6b2bde3f65d5?q=80&w=200&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1559526323-cb2f2fe2591b?q=80&w=200&auto=format&fit=crop',
+    ];
 
     useEffect(() => {
         if (user) {
@@ -49,7 +58,7 @@ const ProfilePage = () => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setFormData(prev => ({ ...prev, avatarUrl: reader.result }));
-                setShowPicMenu(false);
+                setShowPicPicker(false);
             };
             reader.readAsDataURL(file);
         }
@@ -131,22 +140,71 @@ const ProfilePage = () => {
                         <div className="flex items-center gap-6 mb-8 pb-8 border-b border-slate-100">
                             <div className="relative">
                                 <div
-                                    onClick={() => isEditing && setShowPicMenu(!showPicMenu)}
-                                    className={`w-24 h-24 rounded-full bg-slate-200 border-4 border-primary-500 bg-cover bg-center shrink-0 ${isEditing ? 'cursor-pointer hover:opacity-90 transition-opacity shadow-md' : ''}`}
-                                    style={{ backgroundImage: `url('${isEditing ? formData.avatarUrl || user.avatarUrl || 'https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?q=80&w=250&auto=format&fit=crop' : user.avatarUrl || 'https://images.unsplash.com/photo-1595959183082-7b570b7e08e2?q=80&w=250&auto=format&fit=crop'}')` }}
+                                    onClick={() => isEditing && setShowPicPicker(true)}
+                                    className={`w-24 h-24 rounded-full bg-slate-200 border-4 border-primary-500 bg-cover bg-center shrink-0 ${isEditing ? 'cursor-pointer hover:opacity-80 transition-opacity shadow-md' : ''}`}
+                                    style={{ backgroundImage: `url('${isEditing ? formData.avatarUrl || user.avatarUrl || PRESET_AVATARS[0] : user.avatarUrl || PRESET_AVATARS[0]}')` }}
                                 ></div>
-                                {isEditing && showPicMenu && (
-                                    <div className="absolute top-full mt-2 left-0 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-10">
-                                        <button onClick={() => { setShowPicViewer(true); setShowPicMenu(false); }} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-medium">
-                                            View profile picture
-                                        </button>
-                                        <button onClick={() => { fileInputRef.current?.click(); setShowPicMenu(false); }} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 font-medium">
-                                            Edit profile picture
-                                        </button>
-                                    </div>
+                                {isEditing && (
+                                    <button
+                                        onClick={() => setShowPicPicker(true)}
+                                        className="absolute -bottom-1 -right-1 w-7 h-7 bg-primary-500 rounded-full flex items-center justify-center shadow-md hover:bg-primary-600 transition-colors"
+                                    >
+                                        <span className="material-symbols-outlined text-white text-[14px]">photo_camera</span>
+                                    </button>
                                 )}
                                 <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
                             </div>
+
+                            {/* Photo Picker Modal */}
+                            {showPicPicker && (
+                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setShowPicPicker(false)}>
+                                    <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 border border-slate-200" onClick={e => e.stopPropagation()}>
+                                        <div className="flex justify-between items-center mb-5">
+                                            <div>
+                                                <h3 className="text-lg font-black text-slate-900">Choose Profile Photo</h3>
+                                                <p className="text-xs text-slate-500 font-medium mt-0.5">Select a preset or upload your own</p>
+                                            </div>
+                                            <button onClick={() => setShowPicPicker(false)} className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors">
+                                                <span className="material-symbols-outlined text-xl">close</span>
+                                            </button>
+                                        </div>
+
+                                        {/* Preset Grid */}
+                                        <div className="grid grid-cols-4 gap-3 mb-5">
+                                            {PRESET_AVATARS.map((url, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => { setFormData(prev => ({ ...prev, avatarUrl: url })); setShowPicPicker(false); }}
+                                                    className="relative group"
+                                                >
+                                                    <div
+                                                        className="w-full aspect-square rounded-xl bg-cover bg-center border-2 transition-all group-hover:scale-105 group-hover:shadow-md"
+                                                        style={{
+                                                            backgroundImage: `url('${url}')`,
+                                                            borderColor: formData.avatarUrl === url ? '#22c55e' : 'transparent'
+                                                        }}
+                                                    ></div>
+                                                    {formData.avatarUrl === url && (
+                                                        <div className="absolute top-1 right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                                                            <span className="material-symbols-outlined text-white text-[10px]">check</span>
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        <div className="border-t border-slate-100 pt-4">
+                                            <button
+                                                onClick={() => { fileInputRef.current?.click(); }}
+                                                className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:border-primary-400 hover:text-primary-600 hover:bg-primary-50 transition-all"
+                                            >
+                                                <span className="material-symbols-outlined text-[18px]">upload</span>
+                                                Browse & Upload Photo
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             <div className="flex-1 min-w-0">
                                 {isEditing ? (
                                     <div className="space-y-3 max-w-md">

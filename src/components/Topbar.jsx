@@ -7,6 +7,7 @@ const Topbar = ({ title = '' }) => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
     const dropdownRef = useRef(null);
 
     useEffect(() => {
@@ -39,10 +40,30 @@ const Topbar = ({ title = '' }) => {
             </div>
 
             <div className="flex items-center gap-6 ml-auto">
-                <button className="relative p-2 rounded-full hover:bg-slate-50 transition-colors text-slate-500">
+                <button 
+                    onClick={() => setShowNotifications(true)}
+                    className="relative p-2 rounded-full hover:bg-slate-50 transition-colors text-slate-500"
+                >
                     <Bell className="w-5 h-5" />
                     <span className="absolute top-2 right-2 w-2 h-2 bg-primary-500 rounded-full border-2 border-white"></span>
                 </button>
+
+                {showNotifications && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                        <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+                            <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                                <h3 className="font-black text-slate-900">Notifications</h3>
+                                <button onClick={() => setShowNotifications(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                                    <span className="material-symbols-outlined text-xl">close</span>
+                                </button>
+                            </div>
+                            <div className="p-8 text-center">
+                                <span className="material-symbols-outlined text-4xl text-slate-300 mb-2">notifications_off</span>
+                                <p className="text-slate-500 font-medium">You do not have any notifications.</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <div className="relative" ref={dropdownRef}>
                     <div 

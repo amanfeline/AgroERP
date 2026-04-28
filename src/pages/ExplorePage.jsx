@@ -6,11 +6,14 @@ import { Sprout, TrendingUp, HandCoins, Building2, Sun } from 'lucide-react';
 import { useWeatherPrediction } from '../hooks/useWeatherPrediction';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLivePrices } from '../services/marketApi';
 
 const ExplorePage = () => {
     const { prediction } = useWeatherPrediction();
     const { user } = useAuth();
+    const { data: livePrices, isLoading: isPricesLoading } = useLivePrices("India");
     const [filterAiMatch, setFilterAiMatch] = useState(false);
+    const [showAllCrops, setShowAllCrops] = useState(false);
     const [engineData, setEngineData] = useState({ profitableCrops: [], optimizedRecommendations: [] });
 
     useEffect(() => {
@@ -99,16 +102,39 @@ const ExplorePage = () => {
                                                 </button>
                                             )}
                                         </div>
-                                        <button className="text-sm font-bold text-primary-600 hover:underline">View All</button>
+                                        <button 
+                                            onClick={() => setShowAllCrops(true)}
+                                            className="text-sm font-bold text-primary-600 hover:underline"
+                                        >
+                                            View All
+                                        </button>
                                     </div>
                                     <div className="flex gap-6 overflow-x-auto pb-4 snap-x hide-scrollbar">
                                         {displayedCrops.map((crop, index) => (
                                             <div key={crop.id} className="snap-start">
-                                                {/* For visual demo, we make every alternating crop an AI match if the overall window is optimal */}
                                                 <ExploreCropCard data={crop} aiMatch={isAiMatch && index % 2 === 0} />
                                             </div>
                                         ))}
                                     </div>
+
+                                    {/* Modal for View All Crops */}
+                                    {showAllCrops && (
+                                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                                            <div className="bg-white w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                                                <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                                                    <h2 className="text-2xl font-black text-slate-900">All Recommended Crops</h2>
+                                                    <button onClick={() => setShowAllCrops(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                                                        <span className="material-symbols-outlined text-2xl">close</span>
+                                                    </button>
+                                                </div>
+                                                <div className="p-6 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                                    {displayedCrops.map((crop, index) => (
+                                                        <ExploreCropCard key={crop.id} data={crop} aiMatch={isAiMatch && index % 2 === 0} />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </section>
 
                                 {/* Smart Recommendations */}
@@ -158,36 +184,24 @@ const ExplorePage = () => {
                                         </span>
                                     </div>
                                     <div className="space-y-4 mb-6">
-                                        <div className="flex justify-between items-center group cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-lg transition-colors">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"><TrendingUp className="w-4 h-4" /></div>
-                                                <p className="font-bold text-slate-900">Rice Grade A</p>
+                                        {isPricesLoading ? (
+                                            <div className="text-center text-sm text-slate-500 py-4">Loading live trends...</div>
+                                        ) : livePrices.slice(0, 3).map((item, idx) => (
+                                            <div key={idx} className="flex justify-between items-center group cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-lg transition-colors">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                                                        <TrendingUp className="w-4 h-4" />
+                                                    </div>
+                                                    <p className="font-bold text-slate-900">{item.commodity}</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="font-bold">${item.price.toFixed(2)}</p>
+                                                    <p className={`text-xs font-bold ${item.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                                        {item.change >= 0 ? '+' : ''}{item.change}%
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div className="text-right">
-                                                <p className="font-bold">${410.20}</p>
-                                                <p className="text-xs font-bold text-red-500">-0.8%</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex justify-between items-center group cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-lg transition-colors">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"><TrendingUp className="w-4 h-4" /></div>
-                                                <p className="font-bold text-slate-900">Maize</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="font-bold">${185.00}</p>
-                                                <p className="text-xs font-bold text-green-500">+1.2%</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex justify-between items-center group cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-lg transition-colors">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"><TrendingUp className="w-4 h-4" /></div>
-                                                <p className="font-bold text-slate-900">Cotton</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="font-bold">${842.00}</p>
-                                                <p className="text-xs font-bold text-slate-400">0.0%</p>
-                                            </div>
-                                        </div>
+                                        ))}
                                     </div>
                                     <button className="relative z-10 w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 rounded-xl transition-colors">
                                         Full Market Report

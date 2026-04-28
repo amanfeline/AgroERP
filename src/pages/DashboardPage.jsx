@@ -7,11 +7,12 @@ import { useWeatherPrediction } from '../hooks/useWeatherPrediction';
 import { useAuth } from '../context/AuthContext';
 import { NavLink } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { LayoutGrid, List, Plus, CheckCircle2 } from 'lucide-react';
+import { LayoutGrid, List, Plus, CheckCircle2, X } from 'lucide-react';
 
 const DashboardPage = () => {
     const { user } = useAuth();
     const [layout, setLayout] = useState('grid');
+    const [showSoilReport, setShowSoilReport] = useState(false);
     const { prediction, isLoading: isWeatherLoading } = useWeatherPrediction();
 
     const [dashboardData, setDashboardData] = useState(null);
@@ -132,8 +133,11 @@ const DashboardPage = () => {
                                     <span className="material-symbols-outlined text-primary-400 text-3xl mb-4">psychiatry</span>
                                     <h3 className="text-xl font-bold text-white mb-2">Automated Soil Report Ready</h3>
                                     <p className="text-sm text-primary-200 font-medium mb-6">Generated 10 minutes ago based on satellite imagery.</p>
-                                    <button className="mt-auto w-max px-4 py-2 bg-white text-primary-900 text-sm font-bold rounded-lg hover:bg-slate-100 transition-colors">
-                                        Open PDF Report
+                                    <button 
+                                        onClick={() => setShowSoilReport(true)}
+                                        className="mt-auto w-max px-4 py-2 bg-white text-primary-900 text-sm font-bold rounded-lg hover:bg-slate-100 transition-colors"
+                                    >
+                                        Open Detailed Report
                                     </button>
                                 </div>
                             </div>
@@ -300,6 +304,72 @@ const DashboardPage = () => {
                         Add New Crop
                     </button>
                 </div>
+
+                {/* Soil Report Modal */}
+                {showSoilReport && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                        <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                            <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                                <div>
+                                    <h2 className="text-2xl font-black text-slate-900">Automated Soil Analysis Report</h2>
+                                    <p className="text-sm text-slate-500 font-medium">Generated from satellite imagery · {new Date().toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })}</p>
+                                </div>
+                                <button onClick={() => setShowSoilReport(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors">
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+                            <div className="p-6 overflow-y-auto space-y-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-green-50 border border-green-200 p-4 rounded-xl">
+                                        <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-1">Soil Health Score</p>
+                                        <p className="text-3xl font-black text-green-700">88<span className="text-lg">/100</span></p>
+                                        <p className="text-xs text-green-600 font-medium mt-1">↑ +3 from last month</p>
+                                    </div>
+                                    <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl">
+                                        <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1">Moisture Level</p>
+                                        <p className="text-3xl font-black text-blue-700">64<span className="text-lg">%</span></p>
+                                        <p className="text-xs text-blue-600 font-medium mt-1">Optimal range: 60-75%</p>
+                                    </div>
+                                    <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl">
+                                        <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">Nitrogen (N)</p>
+                                        <p className="text-3xl font-black text-amber-700">210<span className="text-lg"> kg/ha</span></p>
+                                        <p className="text-xs text-amber-600 font-medium mt-1">Slightly below optimal</p>
+                                    </div>
+                                    <div className="bg-purple-50 border border-purple-200 p-4 rounded-xl">
+                                        <p className="text-xs font-bold text-purple-600 uppercase tracking-widest mb-1">pH Level</p>
+                                        <p className="text-3xl font-black text-purple-700">6.8</p>
+                                        <p className="text-xs text-purple-600 font-medium mt-1">Ideal (6.5 – 7.0)</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <h3 className="font-bold text-slate-900 border-b pb-2">Nutrient Breakdown</h3>
+                                    {[
+                                        { label: 'Phosphorus (P)', value: '85%', color: 'bg-blue-500' },
+                                        { label: 'Potassium (K)', value: '72%', color: 'bg-green-500' },
+                                        { label: 'Organic Matter', value: '61%', color: 'bg-amber-500' },
+                                        { label: 'Microbial Activity', value: '92%', color: 'bg-primary-500' },
+                                    ].map((item) => (
+                                        <div key={item.label}>
+                                            <div className="flex justify-between text-sm font-medium text-slate-700 mb-1">
+                                                <span>{item.label}</span>
+                                                <span className="font-bold">{item.value}</span>
+                                            </div>
+                                            <div className="w-full bg-slate-100 rounded-full h-2">
+                                                <div className={`${item.color} h-2 rounded-full`} style={{ width: item.value }}></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="p-4 bg-primary-50 rounded-xl border border-primary-200">
+                                    <h4 className="font-bold text-primary-900 mb-2">AI Recommendation</h4>
+                                    <p className="text-sm text-primary-800">Soil nitrogen levels are slightly low. Consider applying 25 kg/ha of urea before next irrigation cycle. Phosphorus and potassium levels are healthy. Microbial activity is excellent — bio-fertilizer application is working well.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

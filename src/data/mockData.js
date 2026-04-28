@@ -62,7 +62,7 @@ export const exploreCrops = [
         id: 1,
         name: 'Basmati Rice',
         description: 'High yield potential for upcoming monsoon',
-        badge: 'TOP CHOICE',
+        badge: 'TOP PRIORITY',
         image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=300&auto=format&fit=crop'
     },
     {
@@ -82,6 +82,42 @@ export const exploreCrops = [
         name: 'Black Soy',
         description: 'Nitrogen fixing cover crop option',
         image: 'https://images.unsplash.com/photo-1521575791263-dcae8a881cb5?q=80&w=300&auto=format&fit=crop'
+    },
+    {
+        id: 5,
+        name: 'Sugarcane',
+        description: 'High profitability with steady water supply',
+        image: 'https://images.unsplash.com/photo-1590391038501-c67d3071bb25?q=80&w=300&auto=format&fit=crop'
+    },
+    {
+        id: 6,
+        name: 'Groundnut',
+        description: 'Excellent for sandy loam soils',
+        image: 'https://images.unsplash.com/photo-1629828557929-e8dafb66cb1e?q=80&w=300&auto=format&fit=crop'
+    },
+    {
+        id: 7,
+        name: 'Turmeric',
+        description: 'High value cash crop with medicinal properties',
+        image: 'https://images.unsplash.com/photo-1615484477201-cb864b2811cc?q=80&w=300&auto=format&fit=crop'
+    },
+    {
+        id: 8,
+        name: 'Pigeon Pea (Arhar)',
+        description: 'Deep-rooted, drought-tolerant pulse',
+        image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=300&auto=format&fit=crop'
+    },
+    {
+        id: 9,
+        name: 'Pearl Millet (Bajra)',
+        description: 'Resilient crop for semi-arid regions',
+        image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?q=80&w=300&auto=format&fit=crop'
+    },
+    {
+        id: 10,
+        name: 'Sorghum (Jowar)',
+        description: 'Dual-purpose grain and fodder crop',
+        image: 'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?q=80&w=300&auto=format&fit=crop'
     }
 ];
 

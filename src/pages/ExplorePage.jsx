@@ -292,7 +292,7 @@ const ExplorePage = () => {
                                             <div className="text-center text-sm text-slate-400 py-4">Market data unavailable</div>
                                         )}
                                     </div>
-                                    <button onClick={() => navigate('/market')} className="relative z-10 w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 rounded-xl transition-colors">
+                                    <button onClick={() => navigate('/market-prices')} className="relative z-10 w-full py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 rounded-xl transition-colors">
                                         Full Market Report →
                                     </button>
                                 </div>

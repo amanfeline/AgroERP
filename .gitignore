@@ -17,3 +17,6 @@ auth-server/.env
 .env.production
 venv/
 *.pyc
+auth-server/database-dump.json
+auth-server/database-dump.json.tmp
+*.log

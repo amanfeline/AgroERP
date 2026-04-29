@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import GoogleAuthModal from '../components/GoogleAuthModal';
+import { useGoogleLogin } from '@react-oauth/google';
 
 const RegisterPage = () => {
     const navigate = useNavigate();
@@ -49,22 +49,33 @@ const RegisterPage = () => {
         setLoading(false);
     };
 
-    const handleGoogleSuccess = async (name, email) => {
-        setLoading(true);
-        setShowGoogleModal(false);
-        
-        try {
-            const result = await googleLogin(name, email);
-            if (result.success) {
-                navigate('/dashboard');
-            } else {
-                setError(result.message || 'Google Login failed.');
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            setLoading(true);
+            setError('');
+            try {
+                const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+                });
+                const userInfo = await userInfoRes.json();
+                
+                const result = await googleLogin(userInfo.name, userInfo.email);
+                if (result.success) {
+                    navigate('/dashboard');
+                } else {
+                    setError(result.message || 'Google Registration failed.');
+                }
+            } catch (err) {
+                console.error("Google Auth Detail:", err);
+                setError('Failed to fetch user details from Google.');
+            } finally {
+                setLoading(false);
             }
-        } catch (err) {
-            setError(err.message || 'Failed to login with Google.');
+        },
+        onError: () => {
+            setError('Google Registration was unsuccessful.');
         }
-        setLoading(false);
-    };
+    });
 
     return (
         <div className="min-h-screen w-full flex bg-[#f5f5f0]">
@@ -121,7 +132,12 @@ const RegisterPage = () => {
                             </div>
                         )}
 
-                        <button type="button" onClick={() => setShowGoogleModal(true)} disabled={loading} className="w-full h-14 bg-white border border-slate-200 hover:bg-slate-50 transition-colors rounded-xl flex items-center justify-center gap-3 shadow-sm group">
+                        <button 
+                            type="button" 
+                            onClick={() => handleGoogleLogin()} 
+                            disabled={loading} 
+                            className="w-full h-14 bg-white border border-slate-200 hover:bg-slate-50 transition-colors rounded-xl flex items-center justify-center gap-3 shadow-sm group"
+                        >
                             <svg className="w-6 h-6" viewBox="0 0 24 24">
                                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
                                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
@@ -237,11 +253,7 @@ const RegisterPage = () => {
                     </div>
                 </div>
             </div>
-        <GoogleAuthModal 
-            isOpen={showGoogleModal} 
-            onClose={() => setShowGoogleModal(false)} 
-            onSuccess={handleGoogleSuccess} 
-        />
+        {/* Official Google Login pop-up is used */}
         </div>
     );
 };

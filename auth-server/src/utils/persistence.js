@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import User from '../models/User.js';
 
-const DUMP_FILE = '/tmp/agroerp-database-dump.json';
+const DUMP_FILE = path.join(process.cwd(), 'database-dump.json');
 
 export const loadData = async () => {
   try {

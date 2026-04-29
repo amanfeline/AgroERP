@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8000/api/v1/auth';
+const BASE_URL = 'http://127.0.0.1:8000/api/v1/auth';
 
 export const register = async (userData) => {
     const response = await fetch(`${BASE_URL}/register`, {
@@ -36,7 +36,7 @@ export const googleLogin = async (name, email) => {
     // Simulate OAuth delay
     await new Promise(r => setTimeout(r, 800));
     
-    // Register a mock user in the backend to establish a session
+    // Attempt to register/sync the Google user in the backend
     const response = await fetch(`${BASE_URL}/register`, {
         method: 'POST',
         headers: {
@@ -45,7 +45,7 @@ export const googleLogin = async (name, email) => {
         body: JSON.stringify({
             name: name,
             email: email,
-            password: 'google_oauth_mock_password_123', // required by backend validation
+            password: 'google_oauth_mock_password_123',
             role: 'farmer',
             landSize: 10,
             location: 'Unknown Location',
@@ -54,9 +54,11 @@ export const googleLogin = async (name, email) => {
     });
 
     const data = await response.json();
-    // If it's not a success and not a duplicate email conflict (409), throw error
-    if (!response.ok && response.status !== 409) {
-        throw new Error(data.message || 'Google Login failed during registration');
+    
+    // We expect 201 (Created), 409 (Conflict), or 400 (Already exists in some implementations)
+    // If it's none of these, the server might be down or rejected the payload
+    if (!response.ok && response.status !== 409 && response.status !== 400) {
+        throw new Error(data.message || 'Google authentication service is currently unavailable');
     }
     
     // The register endpoint does not return an accessToken directly, so we need to login

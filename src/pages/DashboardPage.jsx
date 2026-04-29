@@ -47,7 +47,7 @@ const DashboardPage = () => {
         const fetchDashboardInfo = async () => {
             if (!user) return;
             try {
-                const resCrops = await fetch(`http://localhost:8000/api/crops?email=${user.email}`);
+                const resCrops = await fetch(`http://127.0.0.1:8000/api/crops?email=${user.email}`);
                 const dataCrops = await resCrops.json();
                 
                 if (dataCrops.success && dataCrops.data.length > 0) {
@@ -56,10 +56,10 @@ const DashboardPage = () => {
                     setMyCrops([]);
                 }
 
-                const resDashboard = await fetch(`http://localhost:8000/api/dashboard?email=${user.email}`);
+                const resDashboard = await fetch(`http://127.0.0.1:8000/api/dashboard?email=${user.email}`);
                 const dataDashboard = await resDashboard.json();
                 
-                const resMarket = await fetch(`http://localhost:8000/api/market-prices`);
+                const resMarket = await fetch(`http://127.0.0.1:8000/api/market-prices`);
                 const dataMarket = await resMarket.json();
 
                 if (dataDashboard.success) {

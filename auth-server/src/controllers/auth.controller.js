@@ -79,6 +79,8 @@ export const login = asyncHandler(async (req, res, next) => {
 
   // 3. Verify password
   const isMatch = await user.comparePassword(password);
+  console.log(`[Auth] Login attempt: ${email} | User found: ${!!user} | Password match: ${isMatch}`);
+  
   if (!isMatch) {
     return next(new AppError('Invalid email or password.', 401));
   }

@@ -103,3 +103,7 @@ async def predict_crop_specific(data: CropSpecificRequest):
         "adjusted_suitability": round(final_suitability, 1),
         "recommendation": "Optimal" if final_suitability > 75 else "Sub-optimal"
     }
+import uvicorn
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8001)

@@ -7,7 +7,8 @@ import { useWeatherPrediction } from '../hooks/useWeatherPrediction';
 import { useAuth } from '../context/AuthContext';
 import { NavLink } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { LayoutGrid, List, Plus, CheckCircle2, X } from 'lucide-react';
+import { LayoutGrid, List, Plus, CheckCircle2, X, Leaf, Droplets, FlaskConical, MapPin, ArrowUpRight } from 'lucide-react';
+import { exploreCrops } from '../data/mockData';
 
 const DashboardPage = () => {
     const { user } = useAuth();
@@ -18,26 +19,58 @@ const DashboardPage = () => {
     const [dashboardData, setDashboardData] = useState(null);
     const [myCrops, setMyCrops] = useState([]);
     const [marketData, setMarketData] = useState([]);
+    const [treatmentHistory, setTreatmentHistory] = useState([]);
     const [isLoadingData, setIsLoadingData] = useState(true);
+
+    // Add Crop Modal States
+    const [showAddCropModal, setShowAddCropModal] = useState(false);
+    const [newCropForm, setNewCropForm] = useState({
+        cropId: '',
+        fertilizer: '',
+        area: '',
+        notes: ''
+    });
+
+    // Treatment States
+    const [showAddTreatmentModal, setShowAddTreatmentModal] = useState(false);
+    const [showFullHistoryModal, setShowFullHistoryModal] = useState(false);
+    const [newTreatmentForm, setNewTreatmentForm] = useState({
+        date: new Date().toISOString().split('T')[0],
+        plotId: '',
+        product: '',
+        focus: '',
+        dosage: '',
+        status: 'Completed'
+    });
 
     useEffect(() => {
         const fetchDashboardInfo = async () => {
             if (!user) return;
             try {
-                const resDashboard = await fetch(`http://localhost:8000/api/dashboard?email=${user.email}`);
-                const dataDashboard = await resDashboard.json();
-                
                 const resCrops = await fetch(`http://localhost:8000/api/crops?email=${user.email}`);
                 const dataCrops = await resCrops.json();
+                
+                if (dataCrops.success && dataCrops.data.length > 0) {
+                    setMyCrops(dataCrops.data);
+                } else {
+                    setMyCrops([]);
+                }
+
+                const resDashboard = await fetch(`http://localhost:8000/api/dashboard?email=${user.email}`);
+                const dataDashboard = await resDashboard.json();
                 
                 const resMarket = await fetch(`http://localhost:8000/api/market-prices`);
                 const dataMarket = await resMarket.json();
 
-                if (dataDashboard.success) setDashboardData(dataDashboard.data);
-                if (dataCrops.success) setMyCrops(dataCrops.data);
-                if (dataMarket.success) setMarketData(dataMarket.data.slice(0, 3)); // Show top 3
+                if (dataDashboard.success) {
+                    setDashboardData(dataDashboard.data);
+                    setTreatmentHistory(dataDashboard.data.treatmentHistory || []);
+                }
+                if (dataMarket.success) setMarketData(dataMarket.data.slice(0, 3)); 
             } catch (err) {
                 console.error("Failed to fetch dashboard data", err);
+                setMyCrops([]);
+                setTreatmentHistory([]);
             } finally {
                 setIsLoadingData(false);
             }
@@ -45,6 +78,57 @@ const DashboardPage = () => {
 
         fetchDashboardInfo();
     }, [user]);
+
+    const handleAddTreatment = (e) => {
+        e.preventDefault();
+        const newEntry = {
+            id: Date.now(),
+            ...newTreatmentForm,
+            date: new Date(newTreatmentForm.date).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
+        };
+        setTreatmentHistory([newEntry, ...treatmentHistory]);
+        setShowAddTreatmentModal(false);
+        setNewTreatmentForm({
+            date: new Date().toISOString().split('T')[0],
+            plotId: '',
+            product: '',
+            focus: '',
+            dosage: '',
+            status: 'Completed'
+        });
+    };
+
+    const handleAddCrop = (e) => {
+        e.preventDefault();
+        
+        const selectedCropMeta = exploreCrops.find(c => c.id === parseInt(newCropForm.cropId));
+        
+        if (!selectedCropMeta) return;
+
+        const newCrop = {
+            id: Date.now(),
+            name: selectedCropMeta.name,
+            plot: `PLOT ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}-${Math.floor(Math.random() * 90 + 10)}`,
+            plotColor: ['green', 'blue', 'yellow'][Math.floor(Math.random() * 3)],
+            stage: 'Sowing',
+            microbialHealth: Math.floor(Math.random() * 40 + 60), // 60-100
+            soilMoisture: Math.floor(Math.random() * 30 + 50), // 50-80
+            soilStatus: 'Optimal',
+            bioFertilizer: parseFloat(newCropForm.fertilizer) || 0,
+            area: parseFloat(newCropForm.area) || 0,
+            image: selectedCropMeta.image,
+            location: 'Punjab, India', // Mock location
+            notes: newCropForm.notes
+        };
+
+        setMyCrops([newCrop, ...myCrops]);
+        setShowAddCropModal(false);
+        setNewCropForm({ cropId: '', fertilizer: '', area: '', notes: '' });
+    };
+
+    const handleDeleteCrop = (id) => {
+        setMyCrops(myCrops.filter(crop => crop.id !== id));
+    };
 
     return (
         <div className="flex h-screen bg-[#edf5f0] overflow-hidden">
@@ -273,7 +357,7 @@ const DashboardPage = () => {
                         </div>
 
                         {/* Crop Overview Section */}
-                        <section>
+                        <section id="crop-overview">
                             <div className="flex justify-between items-center mb-6">
                                 <div>
                                     <h3 className="text-2xl font-black text-slate-900">Crop Overview</h3>
@@ -295,23 +379,58 @@ const DashboardPage = () => {
                                 </div>
                             </div>
 
-                            <div className={`grid gap-6 ${layout === 'grid' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
-                                {isLoadingData ? (
-                                    <p className="text-slate-500 p-4">Loading crops...</p>
-                                ) : (
-                                    myCrops.map(crop => (
-                                        <MyCropDetailCard key={crop.id} data={crop} />
-                                    ))
-                                )}
-
-                            </div>
+                            {isLoadingData ? (
+                                <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-12 text-center">
+                                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                                        <Plus className="w-8 h-8 text-slate-300" />
+                                    </div>
+                                    <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Loading your plots...</p>
+                                </div>
+                            ) : myCrops.length > 0 ? (
+                                <div className={`grid gap-6 ${layout === 'grid' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
+                                    {myCrops.map(crop => (
+                                        <MyCropDetailCard 
+                                            key={crop.id} 
+                                            data={crop} 
+                                            onDelete={() => handleDeleteCrop(crop.id)} 
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="bg-white rounded-3xl border border-dashed border-slate-300 p-12 text-center group hover:border-primary-300 transition-colors shadow-sm">
+                                    <div className="w-24 h-24 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                                        <Leaf className="w-12 h-12 text-primary-500" />
+                                    </div>
+                                    <h4 className="text-xl font-black text-slate-900 mb-2">No active crops found</h4>
+                                    <p className="text-slate-500 font-medium mb-8 max-w-sm mx-auto">Start by adding your first crop to monitor its health, growth stages, and weather compatibility.</p>
+                                    <button 
+                                        onClick={() => setShowAddCropModal(true)}
+                                        className="bg-primary-500 text-white font-bold px-8 py-3 rounded-full hover:bg-primary-600 transition-all shadow-lg shadow-primary-500/25 flex items-center gap-2 mx-auto"
+                                    >
+                                        <Plus className="w-5 h-5" />
+                                        Add Your First Crop
+                                    </button>
+                                </div>
+                            )}
                         </section>
 
                         {/* History Table */}
                         <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-8">
                             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                                <h3 className="text-xl font-extrabold text-slate-900">Recent Bio-Fertilizer & Microbe Treatments</h3>
-                                <button className="text-sm border border-primary-200 bg-white font-bold text-primary-600 px-4 py-1.5 rounded-full hover:bg-primary-50 transition-colors shadow-sm">
+                                <div className="flex items-center gap-3">
+                                    <h3 className="text-xl font-extrabold text-slate-900">Recent Bio-Fertilizer & Microbe Treatments</h3>
+                                    <button 
+                                        onClick={() => setShowAddTreatmentModal(true)}
+                                        className="w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center hover:bg-primary-600 transition-colors shadow-md shadow-primary-500/20"
+                                        title="Add New Treatment"
+                                    >
+                                        <Plus className="w-5 h-5" />
+                                    </button>
+                                </div>
+                                <button 
+                                    onClick={() => setShowFullHistoryModal(true)}
+                                    className="text-sm border border-primary-200 bg-white font-bold text-primary-600 px-4 py-1.5 rounded-full hover:bg-primary-50 transition-colors shadow-sm"
+                                >
                                     View Full History →
                                 </button>
                             </div>
@@ -330,22 +449,26 @@ const DashboardPage = () => {
                                     <tbody className="divide-y divide-slate-100">
                                         {isLoadingData ? (
                                             <tr><td colSpan="6" className="p-4 text-center text-slate-500">Loading history...</td></tr>
-                                        ) : (
-                                            dashboardData?.treatmentHistory?.map((row) => (
+                                        ) : treatmentHistory.length > 0 ? (
+                                            treatmentHistory.slice(0, 5).map((row) => (
                                                 <tr key={row.id} className="hover:bg-slate-50/80 transition-colors">
                                                     <td className="p-4 pl-6 font-medium text-slate-600">{row.date}</td>
-                                                    <td className="p-4 font-bold text-slate-900">{row.plot}</td>
+                                                    <td className="p-4 font-bold text-slate-900">{row.plotId || row.plot}</td>
                                                     <td className="p-4 font-bold text-primary-700">{row.product}</td>
                                                     <td className="p-4 text-sm text-slate-600">{row.focus}</td>
                                                     <td className="p-4 font-medium text-slate-900">{row.dosage}</td>
                                                     <td className="p-4 pr-6 text-right">
-                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 border border-green-200 text-xs font-bold rounded-full uppercase">
-                                                            <CheckCircle2 className="w-3.5 h-3.5" />
+                                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full uppercase border ${
+                                                            row.status === 'Completed' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                                                        }`}>
+                                                            {row.status === 'Completed' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>}
                                                             {row.status}
                                                         </span>
                                                     </td>
                                                 </tr>
                                             ))
+                                        ) : (
+                                            <tr><td colSpan="6" className="p-12 text-center text-slate-400 font-medium">No treatment records found. Click the + button to add one.</td></tr>
                                         )}
                                     </tbody>
                                 </table>
@@ -356,73 +479,331 @@ const DashboardPage = () => {
 
                 {/* Sticky FAB from My Crops */}
                 <div className="fixed bottom-8 right-8 z-30">
-                    <button className="bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/30 font-bold px-6 py-4 rounded-full flex items-center gap-2 transition-transform hover:-translate-y-1">
+                    <button 
+                        onClick={() => setShowAddCropModal(true)}
+                        className="bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/30 font-bold px-6 py-4 rounded-full flex items-center gap-2 transition-transform hover:-translate-y-1"
+                    >
                         <Plus className="w-6 h-6" />
                         Add New Crop
                     </button>
                 </div>
 
-                {/* Soil Report Modal */}
-                {showSoilReport && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                        <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-                            <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                {/* Add New Crop Modal */}
+                {showAddCropModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
+                        <div className="bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-white/20 animate-in zoom-in-95 duration-300">
+                            <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-slate-50 to-white">
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900">Automated Soil Analysis Report</h2>
-                                    <p className="text-sm text-slate-500 font-medium">Generated from satellite imagery · {new Date().toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })}</p>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Plant New Crop</h2>
+                                    <p className="text-sm text-slate-500 font-medium">Define your plot details to start tracking</p>
                                 </div>
-                                <button onClick={() => setShowSoilReport(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors">
+                                <button onClick={() => setShowAddCropModal(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all">
                                     <X className="w-6 h-6" />
                                 </button>
                             </div>
-                            <div className="p-6 overflow-y-auto space-y-6">
+
+                            <form onSubmit={handleAddCrop} className="p-8 overflow-y-auto space-y-6">
+                                {/* Crop Selection */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                        <Leaf className="w-3.5 h-3.5 text-primary-500" />
+                                        Select Crop Type
+                                    </label>
+                                    <select 
+                                        required
+                                        value={newCropForm.cropId}
+                                        onChange={(e) => setNewCropForm({...newCropForm, cropId: e.target.value})}
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 font-bold text-slate-900 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none appearance-none cursor-pointer"
+                                    >
+                                        <option value="">Choose a crop...</option>
+                                        {exploreCrops.map(crop => (
+                                            <option key={crop.id} value={crop.id}>{crop.name} ({crop.season})</option>
+                                        ))}
+                                    </select>
+                                </div>
+
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-green-50 border border-green-200 p-4 rounded-xl">
-                                        <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-1">Soil Health Score</p>
-                                        <p className="text-3xl font-black text-green-700">88<span className="text-lg">/100</span></p>
-                                        <p className="text-xs text-green-600 font-medium mt-1">↑ +3 from last month</p>
+                                    {/* Fertilizer */}
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                            <FlaskConical className="w-3.5 h-3.5 text-blue-500" />
+                                            Bio-Fertilizer (L/A)
+                                        </label>
+                                        <input 
+                                            type="number"
+                                            required
+                                            placeholder="e.g. 120"
+                                            value={newCropForm.fertilizer}
+                                            onChange={(e) => setNewCropForm({...newCropForm, fertilizer: e.target.value})}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 font-bold text-slate-900 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none"
+                                        />
                                     </div>
-                                    <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl">
-                                        <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1">Moisture Level</p>
-                                        <p className="text-3xl font-black text-blue-700">64<span className="text-lg">%</span></p>
-                                        <p className="text-xs text-blue-600 font-medium mt-1">Optimal range: 60-75%</p>
-                                    </div>
-                                    <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl">
-                                        <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-1">Nitrogen (N)</p>
-                                        <p className="text-3xl font-black text-amber-700">210<span className="text-lg"> kg/ha</span></p>
-                                        <p className="text-xs text-amber-600 font-medium mt-1">Slightly below optimal</p>
-                                    </div>
-                                    <div className="bg-purple-50 border border-purple-200 p-4 rounded-xl">
-                                        <p className="text-xs font-bold text-purple-600 uppercase tracking-widest mb-1">pH Level</p>
-                                        <p className="text-3xl font-black text-purple-700">6.8</p>
-                                        <p className="text-xs text-purple-600 font-medium mt-1">Ideal (6.5 – 7.0)</p>
+                                    {/* Area */}
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                            <LayoutGrid className="w-3.5 h-3.5 text-amber-500" />
+                                            Plot Area (Acres)
+                                        </label>
+                                        <input 
+                                            type="number"
+                                            required
+                                            placeholder="e.g. 5"
+                                            value={newCropForm.area}
+                                            onChange={(e) => setNewCropForm({...newCropForm, area: e.target.value})}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 font-bold text-slate-900 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none"
+                                        />
                                     </div>
                                 </div>
 
-                                <div className="space-y-3">
-                                    <h3 className="font-bold text-slate-900 border-b pb-2">Nutrient Breakdown</h3>
-                                    {[
-                                        { label: 'Phosphorus (P)', value: '85%', color: 'bg-blue-500' },
-                                        { label: 'Potassium (K)', value: '72%', color: 'bg-green-500' },
-                                        { label: 'Organic Matter', value: '61%', color: 'bg-amber-500' },
-                                        { label: 'Microbial Activity', value: '92%', color: 'bg-primary-500' },
-                                    ].map((item) => (
-                                        <div key={item.label}>
-                                            <div className="flex justify-between text-sm font-medium text-slate-700 mb-1">
-                                                <span>{item.label}</span>
-                                                <span className="font-bold">{item.value}</span>
-                                            </div>
-                                            <div className="w-full bg-slate-100 rounded-full h-2">
-                                                <div className={`${item.color} h-2 rounded-full`} style={{ width: item.value }}></div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                {/* Additional Details */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                        <Plus className="w-3.5 h-3.5 text-purple-500" />
+                                        Additional Notes
+                                    </label>
+                                    <textarea 
+                                        rows="3"
+                                        placeholder="Enter soil health notes, specific variety names, or planting conditions..."
+                                        value={newCropForm.notes}
+                                        onChange={(e) => setNewCropForm({...newCropForm, notes: e.target.value})}
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 font-medium text-slate-700 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none resize-none"
+                                    ></textarea>
                                 </div>
 
-                                <div className="p-4 bg-primary-50 rounded-xl border border-primary-200">
-                                    <h4 className="font-bold text-primary-900 mb-2">AI Recommendation</h4>
-                                    <p className="text-sm text-primary-800">Soil nitrogen levels are slightly low. Consider applying 25 kg/ha of urea before next irrigation cycle. Phosphorus and potassium levels are healthy. Microbial activity is excellent — bio-fertilizer application is working well.</p>
+                                <div className="pt-4 flex gap-4">
+                                    <button 
+                                        type="button"
+                                        onClick={() => setShowAddCropModal(false)}
+                                        className="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-2xl hover:bg-slate-200 transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        type="submit"
+                                        className="flex-[2] bg-primary-500 text-white font-black py-4 rounded-2xl hover:bg-primary-600 transition-all shadow-xl shadow-primary-500/25 flex items-center justify-center gap-2"
+                                    >
+                                        Start Planting
+                                        <ArrowUpRight className="w-5 h-5" />
+                                    </button>
                                 </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* Add New Treatment Modal */}
+                {showAddTreatmentModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
+                        <div className="bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-white/20 animate-in zoom-in-95 duration-300">
+                            <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                <div>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Log New Treatment</h2>
+                                    <p className="text-sm text-slate-500 font-medium">Record fertilizer or microbe application</p>
+                                </div>
+                                <button onClick={() => setShowAddTreatmentModal(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all">
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleAddTreatment} className="p-8 overflow-y-auto space-y-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Date */}
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-[14px] text-blue-500">calendar_month</span>
+                                            Date
+                                        </label>
+                                        <input 
+                                            type="date"
+                                            required
+                                            value={newTreatmentForm.date}
+                                            onChange={(e) => setNewTreatmentForm({...newTreatmentForm, date: e.target.value})}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 font-bold text-slate-900 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none"
+                                        />
+                                    </div>
+                                    {/* Plot Selection */}
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-[14px] text-amber-500">grid_view</span>
+                                            Select Plot
+                                        </label>
+                                        <select 
+                                            required
+                                            value={newTreatmentForm.plotId}
+                                            onChange={(e) => setNewTreatmentForm({...newTreatmentForm, plotId: e.target.value})}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 font-bold text-slate-900 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none appearance-none cursor-pointer"
+                                        >
+                                            <option value="">Choose plot...</option>
+                                            {myCrops.length > 0 ? (
+                                                myCrops.map(crop => (
+                                                    <option key={crop.id} value={crop.plot}>{crop.plot} - {crop.name}</option>
+                                                ))
+                                            ) : (
+                                                <option disabled>No active plots found</option>
+                                            )}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Product Selection */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                        <FlaskConical className="w-3.5 h-3.5 text-primary-500" />
+                                        Product Type
+                                    </label>
+                                    <select 
+                                        required
+                                        value={newTreatmentForm.product}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            let focus = '';
+                                            if (val === 'NitroFix Pro') focus = 'Nitrogen Fixing';
+                                            else if (val === 'PhosBoost') focus = 'Phosphorus Solubilizing';
+                                            else if (val === 'Micro Root Pro') focus = 'Mycorrhizal Fungi';
+                                            else if (val === 'Aqua Safe Gel') focus = 'Water Retention';
+                                            else focus = 'Multi-Nutrient';
+                                            
+                                            setNewTreatmentForm({...newTreatmentForm, product: val, focus});
+                                        }}
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 font-bold text-slate-900 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none appearance-none cursor-pointer"
+                                    >
+                                        <option value="">Select product...</option>
+                                        <option value="NitroFix Pro">Nitrogen (NitroFix Pro)</option>
+                                        <option value="PhosBoost">Phosphorus (PhosBoost)</option>
+                                        <option value="Micro Root Pro">Micro Root Pro</option>
+                                        <option value="Aqua Safe Gel">Aqua Safe Gel</option>
+                                        <option value="K-Solubilizer">Potassium Solubilizer</option>
+                                    </select>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Dosage */}
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                            <Droplets className="w-3.5 h-3.5 text-blue-400" />
+                                            Dosage (L/Acre)
+                                        </label>
+                                        <input 
+                                            type="text"
+                                            required
+                                            placeholder="e.g. 15 L/Acre"
+                                            value={newTreatmentForm.dosage}
+                                            onChange={(e) => setNewTreatmentForm({...newTreatmentForm, dosage: e.target.value})}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 font-bold text-slate-900 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none"
+                                        />
+                                    </div>
+                                    {/* Status */}
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                            <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
+                                            Application Status
+                                        </label>
+                                        <select 
+                                            value={newTreatmentForm.status}
+                                            onChange={(e) => setNewTreatmentForm({...newTreatmentForm, status: e.target.value})}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 font-bold text-slate-900 focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none appearance-none cursor-pointer"
+                                        >
+                                            <option value="Completed">Completed</option>
+                                            <option value="In Progress">In Progress</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 flex gap-4">
+                                    <button 
+                                        type="button"
+                                        onClick={() => setShowAddTreatmentModal(false)}
+                                        className="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-2xl hover:bg-slate-200 transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button 
+                                        type="submit"
+                                        className="flex-[2] bg-primary-500 text-white font-black py-4 rounded-2xl hover:bg-primary-600 transition-all shadow-xl shadow-primary-500/25 flex items-center justify-center gap-2"
+                                    >
+                                        Log Treatment
+                                        <CheckCircle2 className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* Full History Modal */}
+                {showFullHistoryModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-lg p-4 animate-in fade-in duration-300">
+                        <div className="bg-white w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border border-white/20">
+                            <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                <div>
+                                    <h2 className="text-3xl font-black text-slate-900 tracking-tight">Full Treatment Log</h2>
+                                    <p className="text-slate-500 font-medium">Comprehensive historical record of all field applications</p>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <button 
+                                        onClick={() => {
+                                            setShowFullHistoryModal(false);
+                                            setShowAddTreatmentModal(true);
+                                        }}
+                                        className="bg-primary-500 text-white font-bold px-6 py-2.5 rounded-xl hover:bg-primary-600 transition-all flex items-center gap-2"
+                                    >
+                                        <Plus className="w-5 h-5" />
+                                        New Entry
+                                    </button>
+                                    <button onClick={() => setShowFullHistoryModal(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-white rounded-xl transition-all shadow-sm border border-slate-200">
+                                        <X className="w-6 h-6" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="flex-1 overflow-auto p-0">
+                                <table className="w-full text-left border-collapse min-w-[800px]">
+                                    <thead className="sticky top-0 z-10">
+                                        <tr className="bg-slate-100/80 backdrop-blur text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-slate-200">
+                                            <th className="p-6 pl-10">Date</th>
+                                            <th className="p-6">Plot ID</th>
+                                            <th className="p-6">Product</th>
+                                            <th className="p-6">Action / Focus</th>
+                                            <th className="p-6">Dosage</th>
+                                            <th className="p-6 pr-10 text-right">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 bg-white">
+                                        {treatmentHistory.map((row) => (
+                                            <tr key={row.id} className="hover:bg-slate-50/50 transition-colors group">
+                                                <td className="p-6 pl-10">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors">
+                                                            <span className="material-symbols-outlined text-[20px]">event</span>
+                                                        </div>
+                                                        <span className="font-bold text-slate-700">{row.date}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="p-6 font-black text-slate-900">{row.plotId || row.plot}</td>
+                                                <td className="p-6">
+                                                    <span className="px-3 py-1.5 bg-primary-50 text-primary-700 rounded-lg font-bold text-sm border border-primary-100">
+                                                        {row.product}
+                                                    </span>
+                                                </td>
+                                                <td className="p-6 text-sm font-medium text-slate-500">{row.focus}</td>
+                                                <td className="p-6 font-bold text-slate-800">{row.dosage}</td>
+                                                <td className="p-6 pr-10 text-right">
+                                                    <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[11px] font-black uppercase border shadow-sm ${
+                                                        row.status === 'Completed' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                                                    }`}>
+                                                        {row.status === 'Completed' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>}
+                                                        {row.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div className="p-6 border-t border-slate-100 bg-slate-50/30 flex justify-between items-center">
+                                <p className="text-sm text-slate-400 font-medium">Total entries: <span className="text-slate-900 font-black">{treatmentHistory.length}</span></p>
+                                <p className="text-xs text-slate-400 italic">Historical data is synced with your farm cloud</p>
                             </div>
                         </div>
                     </div>
@@ -436,7 +817,7 @@ const DashboardPage = () => {
 
                     <div className="relative z-10 px-10 pt-10 pb-6">
                         {/* Main Footer Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8 mb-10">
                             {/* Brand Column */}
                             <div className="md:col-span-1">
                                 <div className="flex items-center gap-2.5 mb-4">
@@ -517,6 +898,21 @@ const DashboardPage = () => {
                                     ].map(link => (
                                         <li key={link.label}>
                                             <a href={link.href} className="text-sm text-green-100/50 hover:text-white font-medium transition-colors">{link.label}</a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            {/* Developers Section */}
+                            <div>
+                                <h4 className="text-xs font-black text-green-400/80 uppercase tracking-[0.15em] mb-4">Developers</h4>
+                                <ul className="space-y-2.5">
+                                    <li>
+                                        <a href="https://www.linkedin.com/in/amanyadav0512/" target="_blank" rel="noopener noreferrer" className="text-sm text-green-100/50 hover:text-white font-medium transition-colors">Aman</a>
+                                    </li>
+                                    {['Chirag', 'Anurag', 'Ayush'].map(name => (
+                                        <li key={name}>
+                                            <span className="text-sm text-green-100/50 hover:text-white font-medium transition-colors cursor-default">{name}</span>
                                         </li>
                                     ))}
                                 </ul>

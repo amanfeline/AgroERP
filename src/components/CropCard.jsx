@@ -1,4 +1,4 @@
-import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Trash2 } from 'lucide-react';
 
 export const ExploreCropCard = ({ data, aiMatch }) => {
     return (
@@ -66,9 +66,21 @@ export const MarketInsightCard = ({ data }) => {
     );
 };
 
-export const MyCropDetailCard = ({ data }) => {
+export const MyCropDetailCard = ({ data, onDelete }) => {
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 overflow-hidden group">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 overflow-hidden group relative">
+            {/* Delete Button */}
+            <button 
+                onClick={(e) => {
+                    e.stopPropagation();
+                    if(window.confirm(`Are you sure you want to remove ${data.name}?`)) onDelete();
+                }}
+                className="absolute top-4 right-4 z-30 w-8 h-8 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-lg backdrop-blur-md border border-red-500/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"
+                title="Delete Crop"
+            >
+                <Trash2 className="w-4 h-4" />
+            </button>
+
             {/* Image Header */}
             <div className="h-48 relative">
                 <div
@@ -85,7 +97,7 @@ export const MyCropDetailCard = ({ data }) => {
                         {data.plot}
                     </span>
                 </div>
-                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur border border-white p-1.5 rounded-lg shadow-sm">
+                <div className="absolute top-4 right-14 bg-white/90 backdrop-blur border border-white p-1.5 rounded-lg shadow-sm">
                     <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest text-center mb-0.5">Stage</p>
                     <p className="text-xs font-bold text-slate-900">{data.stage}</p>
                 </div>
@@ -139,14 +151,28 @@ export const MyCropDetailCard = ({ data }) => {
                     </div>
                 </div>
 
-                <div className="bg-slate-50 rounded-xl p-4 flex items-center justify-between border border-slate-100 group-hover:bg-primary-50 transition-colors">
-                    <div>
-                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Bio-Fertilizer Applied</p>
-                        <p className="text-sm font-bold text-slate-900">{data.bioFertilizer} L/Acre</p>
+                <div className="bg-slate-50 rounded-xl p-4 flex flex-col gap-3 border border-slate-100 group-hover:bg-primary-50 transition-colors">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Bio-Fertilizer Applied</p>
+                            <p className="text-sm font-bold text-slate-900">{data.bioFertilizer} L/Acre</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Area</p>
+                            <p className="text-sm font-bold text-slate-900">{data.area || 0} Acres</p>
+                        </div>
                     </div>
-                    <button className="text-primary-600 text-xs font-bold hover:underline">
-                        View Detail
-                    </button>
+                    
+                    <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-[14px] text-slate-400">location_on</span>
+                            <span className="text-[11px] font-bold text-slate-600">{data.location || 'Local Farm'}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-[14px] text-primary-500">wb_sunny</span>
+                            <span className="text-[11px] font-bold text-slate-900">28°C · Sunny</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

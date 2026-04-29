@@ -4,9 +4,10 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "dev": "concurrently \"vite\" \"npm run dev --prefix auth-server\"",
+        "dev": "concurrently \"vite\" \"npm run dev --prefix auth-server\" \"cd backend && ./venv/bin/python main.py\"",
         "dev:frontend": "vite",
-        "dev:backend": "npm run dev --prefix auth-server",
+        "dev:auth": "npm run dev --prefix auth-server",
+        "dev:ml": "cd backend && ./venv/bin/python main.py",
         "build": "vite build",
         "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
         "preview": "vite preview"
